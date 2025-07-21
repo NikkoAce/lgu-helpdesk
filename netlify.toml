@@ -1,4 +1,4 @@
 [[redirects]]
   from = "/"
-  to = "Backend/login.html"
+  to = "Backend/auth.html"
   status = 200
