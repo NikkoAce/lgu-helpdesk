@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const loadingMessage = document.getElementById('loading-message');
         try {
-            const url = new URL('http://localhost:3000/tickets');
+            const url = new URL('https://lgu-helpdesk-api.onrender.com/tickets');
             url.searchParams.append('page', dashboardCurrentPage);
             url.searchParams.append('limit', 5); // Show 5 tickets per page on dashboard
 

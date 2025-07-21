@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 3. CORE FUNCTIONS ---
     async function fetchTicketDetails() {
         try {
-            const response = await fetch(`http://localhost:3000/tickets/${ticketId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) throw new Error((await response.json()).message);
             const ticket = await response.json();
             loadingMessage.style.display = 'none';
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:3000/tickets/${ticketId}/comments`, {
+                const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}/comments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ author, content })
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateMessage.textContent = '';
             updateMessage.className = 'text-sm mt-2';
             try {
-                const response = await fetch(`http://localhost:3000/tickets/${ticketId}`, {
+                const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ status: newStatus })

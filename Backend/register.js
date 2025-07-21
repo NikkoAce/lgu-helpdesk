@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.className = 'text-sm';
 
         try {
-            const response = await fetch('http://localhost:3000/register', {
+            const response = await fetch('https://lgu-helpdesk-api.onrender.com/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // --- MODIFICATION HERE ---
             const token = localStorage.getItem('authToken'); // Get the token
-            const response = await fetch('http://localhost:3000/tickets', {
+            const response = await fetch('https://lgu-helpdesk-api.onrender.com/tickets', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
