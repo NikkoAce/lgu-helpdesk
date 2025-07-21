@@ -8,8 +8,8 @@ const app = express();
 const PORT = 3000;
 
 // --- CONFIGURATION ---
-const MONGO_URI = 'mongodb+srv://admin123:admin123@cluster0.pwhiz83.mongodb.net/lgu-helpdesk-db?retryWrites=true&w=majority&appName=Cluster0';
-const JWT_SECRET = 'your_super_secret_key_that_should_be_long_and_random';
+const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware & Connection
 app.use(cors());
