@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Redirect to the main application page
-                window.location.href = 'index.html';
+                window.location.href = 'app.html';
 
             } else {
                 const errorData = await response.json();

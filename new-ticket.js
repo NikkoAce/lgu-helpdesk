@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formMessage.classList.add('text-green-600');
                 ticketForm.reset();
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'app.html';
                 }, 2000);
             } else {
                 throw new Error(result.message || 'Failed to create ticket.');

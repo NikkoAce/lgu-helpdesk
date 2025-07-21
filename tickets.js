@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     // Page Protection: Only allow ICTO roles to access this page
     if (!currentUser || !currentUser.role.includes('ICTO')) {
-        window.location.href = 'index.html';
+        window.location.href = 'app.html';
         return;
     }
     const token = localStorage.getItem('authToken');

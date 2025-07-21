@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Page protection: Only allow ICTO Head to see this page
     if (!currentUser || currentUser.role !== 'ICTO Head') {
         // Redirect non-admins to the main dashboard
-        window.location.href = 'index.html';
+        window.location.href = 'app.html';
         // It's good practice to add an alert for better user experience
         alert('Access Denied: This page is for administrators only.');
         return;

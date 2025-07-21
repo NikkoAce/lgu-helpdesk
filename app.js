@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const navLinksData = {
             common: [
-                { name: 'Dashboard', href: 'index.html', icon: getIcon('home') },
+                { name: 'Dashboard', href: 'app.html', icon: getIcon('home') },
                 { name: 'New Ticket', href: 'new-ticket.html', icon: getIcon('ticket') },
             ],
             icto: [{ name: 'All Tickets', href: 'tickets.html', icon: getIcon('document') }],
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('currentUser');
             localStorage.removeItem('authToken');
             // UPDATED: Redirect to the new auth.html page
-            window.location.href = 'auth.html';
+            window.location.href = 'index.html';
         });
     }
 
