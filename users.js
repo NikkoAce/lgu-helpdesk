@@ -54,10 +54,17 @@ document.addEventListener('DOMContentLoaded', () => {
         users.forEach(user => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${user.name}</div></td>
-                <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-gray-500">${user.employeeId}</div></td>
-                <td class="px-6 py-4 whitespace-nowrap"><span class="text-sm text-gray-900">${user.role}</span></td>
+           row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">${user.name}</div>
+                    <div class="text-sm text-gray-500">${user.employeeId}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-500">${user.office || 'N/A'}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-900">${user.role}</span>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                     <button data-action="edit" data-userid="${user._id}" class="text-sky-600 hover:text-sky-900">Edit</button>
                     <button data-action="delete" data-userid="${user._id}" class="text-red-600 hover:text-red-900">Delete</button>

@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2 class="text-lg font-semibold text-gray-800 mb-4">Details</h2>
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between"><span class="font-medium text-gray-500">Requester:</span><span class="text-gray-800 text-right">${ticket.requesterName}</span></div>
+                                <div class="flex justify-between"><span class="font-medium text-gray-500">Office:</span><span class="text-gray-800 text-right">${ticket.requesterOffice || 'N/A'}</span></div>
                                 <div class="flex justify-between"><span class="font-medium text-gray-500">Department:</span><span class="text-gray-800 text-right">${ticket.requesterRole}</span></div>
                                 <div class="flex justify-between"><span class="font-medium text-gray-500">Created:</span><span class="text-gray-800 text-right">${new Date(ticket.createdAt).toLocaleString()}</span></div>
                             </div>

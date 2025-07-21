@@ -18,8 +18,22 @@ mongoose.connect(MONGO_URI).then(() => console.log('MongoDB Connected')).catch(e
 
 // --- SCHEMAS & MODELS ---
 const commentSchema = new mongoose.Schema({ author: String, content: String, createdAt: { type: Date, default: Date.now } });
-const ticketSchema = new mongoose.Schema({ subject: String, description: String, requesterName: String, requesterRole: String, category: String, subCategory: String, urgency: String, status: { type: String, default: 'New' }, createdAt: { type: Date, default: Date.now }, comments: [commentSchema] });
-const userSchema = new mongoose.Schema({ employeeId: { type: String, required: true, unique: true }, name: String, role: String, password: { type: String, required: true } });
+
+const ticketSchema = new mongoose.Schema({
+    subject: String,
+    description: String,
+    requesterName: String,
+    requesterRole: String,
+    requesterOffice: String, // <-- NEW FIELD
+    category: String,
+    subCategory: String,
+    urgency: String,
+    status: { type: String, default: 'New' },
+    createdAt: { type: Date, default: Date.now },
+    comments: [commentSchema]
+});
+
+const userSchema = new mongoose.Schema({ employeeId: { type: String, required: true, unique: true }, name: String, role: String, office: String, password: { type: String, required: true }});
 const Ticket = mongoose.model('Ticket', ticketSchema);
 const User = mongoose.model('User', userSchema);
 
@@ -62,7 +76,15 @@ app.post('/login', async (req, res) => {
         if (!user) return res.status(401).json({ message: 'Invalid Employee ID or Password.' });
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid Employee ID or Password.' });
-        const payload = { user: { id: user._id, name: user.name, role: user.role } };
+
+        const payload = {
+            user: {
+                id: user._id,
+                name: user.name,
+                role: user.role,
+                office: user.office // <-- INCLUDE OFFICE
+            }
+        };
         jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
             res.status(200).json({ token });
@@ -127,7 +149,12 @@ app.get('/tickets', authMiddleware, async (req, res) => {
 // POST /tickets - Create a new ticket
 app.post('/tickets', authMiddleware, async (req, res) => {
     try {
-        const newTicket = new Ticket({ ...req.body, requesterName: req.user.name, requesterRole: req.user.role });
+        const newTicket = new Ticket({
+            ...req.body,
+            requesterName: req.user.name,
+            requesterRole: req.user.role,
+            requesterOffice: req.user.office // <-- SAVE OFFICE
+        });
         await newTicket.save();
         res.status(201).json({ message: 'Ticket created successfully!', ticket: { ...newTicket.toObject(), id: newTicket._id } });
     } catch (error) {
