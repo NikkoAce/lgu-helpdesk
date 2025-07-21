@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const decodedToken = JSON.parse(atob(token.split('.')[1]));
             localStorage.setItem('currentUser', JSON.stringify(decodedToken.user));
 
-            window.location.href = '../Frontend/index.html';
+            window.location.href = 'index.html';
         } catch (error) {
             loginMessage.textContent = `Error: ${error.message}`;
         }

@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('currentUser');
             localStorage.removeItem('authToken');
             // UPDATED: Redirect to the new auth.html page
-            window.location.href = '../Backend/auth.html';
+            window.location.href = 'auth.html';
         });
     }
 
