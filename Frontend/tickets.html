@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Tickets - LGU Helpdesk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="app.js" defer></script>
+    <script src="tickets.js" defer></script>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="flex w-64 flex-col bg-slate-900 text-white">
+            <div class="flex h-16 items-center justify-center border-b border-slate-700">
+                <h1 class="text-xl font-bold">Daet LGU Helpdesk</h1>
+            </div>
+            <nav id="sidebar-nav" class="flex-1 space-y-2 p-4"></nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-1 flex-col">
+            <!-- Header -->
+            <header class="flex h-16 w-full items-center justify-between border-b bg-white px-6">
+                <div></div>
+                <div class="flex items-center space-x-4">
+                    <div id="user-info" class="text-right"></div>
+                    <button id="signout-button" class="rounded-md bg-red-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-600">Sign Out</button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6 md:p-8">
+                <h1 class="text-3xl font-bold text-gray-800">All Support Tickets</h1>
+
+                <!-- NEW: Filter Controls -->
+                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="sm:col-span-2">
+                        <label for="search-input" class="sr-only">Search</label>
+                        <input type="search" id="search-input" placeholder="Search by subject..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label for="status-filter" class="sr-only">Filter by Status</label>
+                        <select id="status-filter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">
+                            <option value="All">All Statuses</option>
+                            <option value="New">New</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Tickets Table Container -->
+                <div class="mt-4 overflow-hidden rounded-lg border bg-white shadow-md">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Subject</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Requester</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
+                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">View</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tickets-table-body" class="divide-y bg-white">
+                            <!-- Rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NEW: Pagination Controls -->
+                <div id="pagination-controls" class="mt-4 flex items-center justify-between">
+                    <button id="prev-button" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Previous</button>
+                    <div id="page-info" class="text-sm text-gray-700"></div>
+                    <button id="next-button" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Next</button>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
