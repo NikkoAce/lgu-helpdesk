@@ -9,11 +9,18 @@
     <script src="users.js" defer></script>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
+        <div class="flex h-screen">
         <!-- Sidebar -->
         <aside class="flex w-64 flex-col bg-slate-900 text-white">
-            <div class="flex h-16 items-center justify-center border-b border-slate-700">
-                <h1 class="text-xl font-bold">Daet LGU Helpdesk</h1>
+            <div class="flex h-32 items-center justify-center gap-3 border-b border-slate-700 px-4">
+        <!-- New Sidebar Header with Image Logo -->
+            <div class="flex h-32 flex-col items-center justify-center border-b border-slate-700 px-4">
+        <!-- Logo Image -->
+            <img src="/applayout//logo/LGU-DAET LOGO.jpg" alt="LGU Logo" class="h-16 w-16 rounded-full object-contain">
+    
+         <!-- Title -->
+         <span class="text-lg font-bold text-white">LGU-Daet IT Helpdesk</span>
+        </div>
             </div>
              <nav id="sidebar-nav" class="flex-1 space-y-2 p-4"></nav>
         </aside>
@@ -58,12 +65,19 @@
     <!-- Edit User Modal -->
     <div id="edit-user-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 class="text-xl font-semibold text-gray-800">Edit User Role</h3>
+            <h3 class="text-xl font-semibold text-gray-800">Edit User Details</h3>
             <form id="edit-user-form" class="mt-4 space-y-4">
-                <p>Editing user: <strong id="edit-user-name"></strong></p>
+                <div>
+                    <label for="edit-user-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input id="edit-user-name" name="name" type="text" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label for="edit-user-office" class="block text-sm font-medium text-gray-700">Office / Department</label>
+                    <input id="edit-user-office" name="office" type="text" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
                 <div>
                     <label for="edit-role-select" class="block text-sm font-medium text-gray-700">Role</label>
-                    <select id="edit-role-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <select id="edit-role-select" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         <option value="Employee">Employee</option>
                         <option value="Department Head">Department Head</option>
                         <option value="ICTO Staff">ICTO Staff</option>

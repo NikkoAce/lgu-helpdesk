@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editModal = document.getElementById('edit-user-modal');
     const editForm = document.getElementById('edit-user-form');
     const editUserName = document.getElementById('edit-user-name');
+    const editUserOffice = document.getElementById('edit-user-office'); // New
     const editRoleSelect = document.getElementById('edit-role-select');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const editMessage = document.getElementById('edit-message');
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openEditModal(user) {
         selectedUserId = user._id;
         editUserName.textContent = user.name;
+        editUserOffice.value = user.office; // New
         editRoleSelect.value = user.role;
         editMessage.textContent = '';
         editModal.classList.remove('hidden');
@@ -111,17 +113,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle the edit form submission
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const newRole = editRoleSelect.value;
+        
+        // Gather all data from the form
+        const updatedData = {
+            name: editUserName.value,
+            office: editUserOffice.value,
+            role: editRoleSelect.value
+        };
+
         editMessage.textContent = 'Saving...';
-        editMessage.className = 'text-sm text-gray-600';
         try {
             const response = await fetch(`https://lgu-helpdesk-api.onrender.com/users/${selectedUserId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ role: newRole })
+                body: JSON.stringify(updatedData)
             });
             if (!response.ok) throw new Error((await response.json()).message);
-            await fetchAndRenderUsers(); // Refresh the table
+            await fetchAndRenderUsers(); // Refresh the table with new data
             closeModal();
         } catch (error) {
             editMessage.textContent = `Error: ${error.message}`;

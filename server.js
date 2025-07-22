@@ -193,20 +193,39 @@ app.get('/users', authMiddleware, async (req, res) => {
 });
 
 app.patch('/users/:id', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden' });
+    if (req.user.role !== 'ICTO Head') {
+        return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
+    }
     try {
-        const { role, office } = req.body;
+        const { name, role, office } = req.body;
         const updateData = {};
+
+        // Build an object with only the fields that were provided
+        if (name) updateData.name = name;
         if (role) updateData.role = role;
         if (office) updateData.office = office;
 
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-password');
-        if (!updatedUser) return res.status(404).json({ message: 'User not found.' });
+        // Ensure at least one field is being updated
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: 'No update data provided.' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true } // Return the updated document
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
         res.status(200).json(updatedUser);
     } catch (error) {
         res.status(500).json({ message: 'Error updating user', error: error.message });
     }
 });
+
+
 
 app.delete('/users/:id', authMiddleware, async (req, res) => {
     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden' });
