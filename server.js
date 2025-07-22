@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -24,7 +25,7 @@ const ticketSchema = new mongoose.Schema({
     description: String,
     requesterName: String,
     requesterRole: String,
-    requesterOffice: String, // <-- NEW FIELD
+    requesterOffice: String,
     category: String,
     subCategory: String,
     urgency: String,
@@ -33,7 +34,14 @@ const ticketSchema = new mongoose.Schema({
     comments: [commentSchema]
 });
 
-const userSchema = new mongoose.Schema({ employeeId: { type: String, required: true, unique: true }, name: String, role: String, office: String, password: { type: String, required: true }});
+const userSchema = new mongoose.Schema({
+    employeeId: { type: String, required: true, unique: true },
+    name: String,
+    role: String,
+    office: String,
+    password: { type: String, required: true }
+});
+
 const Ticket = mongoose.model('Ticket', ticketSchema);
 const User = mongoose.model('User', userSchema);
 
@@ -54,13 +62,13 @@ const authMiddleware = (req, res, next) => {
 // --- PUBLIC ROUTES ---
 app.post('/register', async (req, res) => {
     try {
-        const { employeeId, name, role, password } = req.body;
-        if (!employeeId || !name || !role || !password) return res.status(400).json({ message: 'All fields are required.' });
+        const { employeeId, name, role, password, office } = req.body;
+        if (!employeeId || !name || !role || !password || !office) return res.status(400).json({ message: 'All fields are required.' });
         const existingUser = await User.findOne({ employeeId });
         if (existingUser) return res.status(400).json({ message: 'Employee ID already registered.' });
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = new User({ employeeId, name, role, password: hashedPassword });
+        const newUser = new User({ employeeId, name, role, office, password: hashedPassword });
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
@@ -76,15 +84,7 @@ app.post('/login', async (req, res) => {
         if (!user) return res.status(401).json({ message: 'Invalid Employee ID or Password.' });
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid Employee ID or Password.' });
-
-        const payload = {
-            user: {
-                id: user._id,
-                name: user.name,
-                role: user.role,
-                office: user.office // <-- INCLUDE OFFICE
-            }
-        };
+        const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office } };
         jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
             res.status(200).json({ token });
@@ -94,67 +94,29 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
-// --- PROTECTED ROUTES ---
-
-/**
- * GET /tickets - UPDATED with Filtering and Pagination
- * Fetches tickets based on query parameters.
- */
+// --- PROTECTED TICKET ROUTES ---
 app.get('/tickets', authMiddleware, async (req, res) => {
     try {
-        // Pagination parameters
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-
-        // Filter and Search parameters
         const { status, search } = req.query;
         const queryFilter = {};
-
-        if (status && status !== 'All') {
-            queryFilter.status = status;
-        }
-        if (search) {
-            // Search across subject and description for better results
-            queryFilter.$or = [
-                { subject: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } }
-            ];
-        }
-
-        // Fetch total count for pagination
+        if (status && status !== 'All') queryFilter.status = status;
+        if (search) queryFilter.$or = [{ subject: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
         const totalTickets = await Ticket.countDocuments(queryFilter);
         const totalPages = Math.ceil(totalTickets / limit);
-
-        // Fetch paginated tickets
-        const tickets = await Ticket.find(queryFilter)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
+        const tickets = await Ticket.find(queryFilter).sort({ createdAt: -1 }).skip(skip).limit(limit);
         const responseTickets = tickets.map(t => ({ ...t.toObject(), id: t._id }));
-
-        res.status(200).json({
-            tickets: responseTickets,
-            currentPage: page,
-            totalPages: totalPages
-        });
-
+        res.status(200).json({ tickets: responseTickets, currentPage: page, totalPages: totalPages });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching tickets', error: error.message });
     }
 });
 
-// POST /tickets - Create a new ticket
 app.post('/tickets', authMiddleware, async (req, res) => {
     try {
-        const newTicket = new Ticket({
-            ...req.body,
-            requesterName: req.user.name,
-            requesterRole: req.user.role,
-            requesterOffice: req.user.office // <-- SAVE OFFICE
-        });
+        const newTicket = new Ticket({ ...req.body, requesterName: req.user.name, requesterRole: req.user.role, requesterOffice: req.user.office });
         await newTicket.save();
         res.status(201).json({ message: 'Ticket created successfully!', ticket: { ...newTicket.toObject(), id: newTicket._id } });
     } catch (error) {
@@ -162,7 +124,6 @@ app.post('/tickets', authMiddleware, async (req, res) => {
     }
 });
 
-// GET /tickets/:id - Get a single ticket
 app.get('/tickets/:id', authMiddleware, async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'Invalid Ticket ID.' });
@@ -174,7 +135,6 @@ app.get('/tickets/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// POST /tickets/:id/comments - Add a comment
 app.post('/tickets/:id/comments', authMiddleware, async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'Invalid Ticket ID.' });
@@ -191,7 +151,6 @@ app.post('/tickets/:id/comments', authMiddleware, async (req, res) => {
     }
 });
 
-// PATCH /tickets/:id - Update ticket status
 app.patch('/tickets/:id', authMiddleware, async (req, res) => {
     try {
         const { status } = req.body;
@@ -206,59 +165,25 @@ app.patch('/tickets/:id', authMiddleware, async (req, res) => {
     }
 });
 
-
-
-// --- NEW: ANALYTICS ROUTE ---
+// --- ANALYTICS ROUTE ---
 app.get('/analytics/summary', authMiddleware, async (req, res) => {
     try {
-        // We can run these database queries in parallel for efficiency
-        const [
-            totalTickets,
-            newTickets,
-            inProgressTickets,
-            resolvedTickets,
-            closedTickets
-        ] = await Promise.all([
+        const [totalTickets, newTickets, inProgressTickets, resolvedTickets, closedTickets] = await Promise.all([
             Ticket.countDocuments(),
             Ticket.countDocuments({ status: 'New' }),
             Ticket.countDocuments({ status: 'In Progress' }),
             Ticket.countDocuments({ status: 'Resolved' }),
             Ticket.countDocuments({ status: 'Closed' })
         ]);
-
-        res.status(200).json({
-            totalTickets,
-            new: newTickets,
-            inProgress: inProgressTickets,
-            resolved: resolvedTickets,
-            closed: closedTickets
-        });
-
+        res.status(200).json({ totalTickets, new: newTickets, inProgress: inProgressTickets, resolved: resolvedTickets, closed: closedTickets });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching analytics summary', error: error.message });
     }
 });
 
-// --- NEW: USER MANAGEMENT ROUTE ---
-app.get('/users', authMiddleware, async (req, res) => {
-    // Extra security: Only allow ICTO Head to access this route
-    if (req.user.role !== 'ICTO Head') {
-        return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
-    }
-
-    try {
-        // Fetch all users but exclude the password field for security
-        const users = await User.find().select('-password').sort({ name: 1 });
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching users', error: error.message });
-    }
-});
-
-
 // --- USER MANAGEMENT ROUTES ---
 app.get('/users', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden' });
+    if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
     try {
         const users = await User.find().select('-password').sort({ name: 1 });
         res.status(200).json(users);
@@ -267,22 +192,15 @@ app.get('/users', authMiddleware, async (req, res) => {
     }
 });
 
-/**
- * PATCH /users/:id
- * Updates a user's role.
- */
 app.patch('/users/:id', authMiddleware, async (req, res) => {
     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden' });
     try {
-        const { role } = req.body;
-        if (!role) return res.status(400).json({ message: 'Role is required.' });
+        const { role, office } = req.body;
+        const updateData = {};
+        if (role) updateData.role = role;
+        if (office) updateData.office = office;
 
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            { role },
-            { new: true }
-        ).select('-password');
-
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-password');
         if (!updatedUser) return res.status(404).json({ message: 'User not found.' });
         res.status(200).json(updatedUser);
     } catch (error) {
@@ -290,17 +208,10 @@ app.patch('/users/:id', authMiddleware, async (req, res) => {
     }
 });
 
-/**
- * DELETE /users/:id
- * Deletes a user.
- */
 app.delete('/users/:id', authMiddleware, async (req, res) => {
     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden' });
     try {
-        // Prevent admin from deleting their own account
-        if (req.user.id === req.params.id) {
-            return res.status(400).json({ message: 'Cannot delete your own administrator account.' });
-        }
+        if (req.user.id === req.params.id) return res.status(400).json({ message: 'Cannot delete your own administrator account.' });
         const deletedUser = await User.findByIdAndDelete(req.params.id);
         if (!deletedUser) return res.status(404).json({ message: 'User not found.' });
         res.status(200).json({ message: 'User deleted successfully.' });
@@ -308,8 +219,6 @@ app.delete('/users/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Error deleting user', error: error.message });
     }
 });
-
-
 
 // --- START SERVER ---
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
