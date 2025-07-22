@@ -129,11 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(updatedData)
             });
             if (!response.ok) throw new Error((await response.json()).message);
+             showToast('User updated successfully!');
             await fetchAndRenderUsers(); // Refresh the table with new data
             closeModal();
         } catch (error) {
-            editMessage.textContent = `Error: ${error.message}`;
-            editMessage.className = 'text-sm text-red-600';
+            showToast(`Error: ${error.message}`, 'error'); 
         }
     });
 
@@ -147,11 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error((await response.json()).message);
+            showToast('User deleted successfully.'); // Use toast for success
             await fetchAndRenderUsers(); // Refresh the table
             closeModal();
         } catch (error) {
-            deleteMessage.textContent = `Error: ${error.message}`;
-            deleteMessage.className = 'mt-4 text-sm text-red-600';
+            showToast(`Error: ${error.message}`, 'error'); // Use toast for error
         }
     });
 

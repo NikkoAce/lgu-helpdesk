@@ -62,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
     // UPDATED: Redirect to the new auth.html page if not logged in
-    if (!currentUser && !window.location.pathname.endsWith('auth.html')) {
-        window.location.href = 'auth.html';
+    if (!currentUser && !window.location.pathname.endsWith('index.html')) {
+        window.location.href = 'index.html';
         return; // Stop script execution
     }
 
