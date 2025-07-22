@@ -69,12 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error((await response.json()).message);
             
             const result = await response.json();
-            registerMessage.textContent = `${result.message} Please sign in.`;
-            registerMessage.classList.add('text-green-600');
-            registerForm.reset();
-        } catch (error) {
-            registerMessage.textContent = `Error: ${error.message}`;
-            registerMessage.classList.add('text-red-600');
-        }
-    });
+          // THIS IS THE NEW WAY
+        showToast('User registered successfully! Please sign in.'); // Success toast
+        registerForm.reset();
+
+    } catch (error) {
+        // You can also use it for errors
+        showToast(`Error: ${error.message}`, 'error'); // Error toast
+    }
+});
 });
