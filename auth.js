@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             window.location.href = 'app.html';
         } catch (error) {
-            loginMessage.textContent = `Error: ${error.message}`;
+            showToast(`Error: ${error.message}`, 'error'); 
         }
     });
 

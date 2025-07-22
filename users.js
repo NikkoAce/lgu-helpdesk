@@ -111,17 +111,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Handle the edit form submission
-    editForm.addEventListener('submit', async (e) => {
+        editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Gather all data from the form
+        const saveButton = editForm.querySelector('button[type="submit"]');
+        const originalButtonText = saveButton.innerHTML;
+        
+        // --- NEW: Set Loading State ---
+        saveButton.disabled = true;
+        saveButton.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Saving...
+        `;
+
         const updatedData = {
-            name: editUserName.value,
-            office: editUserOffice.value,
-            role: editRoleSelect.value
+            name: document.getElementById('edit-user-name').value,
+            office: document.getElementById('edit-user-office').value,
+            role: document.getElementById('edit-role-select').value
         };
 
-        editMessage.textContent = 'Saving...';
         try {
             const response = await fetch(`https://lgu-helpdesk-api.onrender.com/users/${selectedUserId}`, {
                 method: 'PATCH',
@@ -129,11 +140,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(updatedData)
             });
             if (!response.ok) throw new Error((await response.json()).message);
-             showToast('User updated successfully!');
-            await fetchAndRenderUsers(); // Refresh the table with new data
+            
+            showToast('User updated successfully!');
+            await fetchAndRenderUsers();
             closeModal();
+
         } catch (error) {
-            showToast(`Error: ${error.message}`, 'error'); 
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            // --- NEW: Restore Button State ---
+            // This 'finally' block ensures the button is always restored,
+            // even if there's an error.
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalButtonText;
         }
     });
 

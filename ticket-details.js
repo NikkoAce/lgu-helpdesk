@@ -117,31 +117,50 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`).join('');
     }
 
-    function setupCommentForm() {
+  function setupCommentForm() {
         const commentForm = document.getElementById('comment-form');
         if (!commentForm) return;
+
         commentForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            
+            const submitButton = commentForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
             const content = event.target.content.value.trim();
-            const author = currentUser.name;
-            const commentError = document.getElementById('comment-error');
-            commentError.textContent = '';
+
             if (!content) {
-                commentError.textContent = 'Comment cannot be empty.';
+                showToast('Comment cannot be empty.', 'error');
                 return;
             }
+
+            // --- Set Loading State ---
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+            `;
+            
             try {
                 const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}/comments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ author, content })
+                    body: JSON.stringify({ content })
                 });
                 if (!response.ok) throw new Error((await response.json()).message);
+                
                 const updatedComments = await response.json();
                 renderComments(updatedComments);
                 event.target.reset();
+
             } catch (error) {
-                commentError.textContent = `Error: ${error.message}`;
+                showToast(`Error: ${error.message}`, 'error');
+            } finally {
+                // --- Restore Button State ---
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
             }
         });
     }
@@ -176,11 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const statusBadge = document.getElementById('status-badge');
                 statusBadge.textContent = updatedTicket.status;
                 statusBadge.className = `text-lg font-medium px-4 py-1.5 rounded-full ${getBadgeColor(updatedTicket.status)}`;
-                updateMessage.textContent = 'Status updated successfully!';
+                showToast('Status updated successfully!'); 
                 updateMessage.classList.add('text-green-600');
             } catch (error) {
-                updateMessage.textContent = `Error: ${error.message}`;
-                updateMessage.classList.add('text-red-600');
+                showToast(`Error: ${error.message}`, 'error');
             }
         });
     }
