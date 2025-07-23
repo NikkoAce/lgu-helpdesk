@@ -74,6 +74,46 @@ document.addEventListener('DOMContentLoaded', () => {
     let dashboardTotalPages = 1;
 
     // --- 2. DYNAMICALLY RENDER PAGE COMPONENTS ---
+     /**
+     * NEW: Fetches and renders the personalized stat cards for the dashboard.
+     */
+    async function renderDashboardAnalytics() {
+        const statsContainer = document.getElementById('dashboard-stats-container');
+        if (!statsContainer) return;
+
+        try {
+            const response = await fetch('https://lgu-helpdesk-api.onrender.com/analytics/dashboard-summary', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error((await response.json()).message);
+            
+            const summary = await response.json();
+
+            statsContainer.innerHTML = `
+                <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
+                    <dt class="truncate text-sm font-medium text-gray-500">Your Total Tickets</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">${summary.total}</dd>
+                </div>
+                <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
+                    <dt class="truncate text-sm font-medium text-gray-500">New</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-blue-600">${summary.new}</dd>
+                </div>
+                <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
+                    <dt class="truncate text-sm font-medium text-gray-500">In Progress</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">${summary.inProgress}</dd>
+                </div>
+                <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
+                    <dt class="truncate text-sm font-medium text-gray-500">Resolved</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-green-600">${summary.resolved}</dd>
+                </div>
+            `;
+        } catch (error) {
+            statsContainer.innerHTML = `<div class="col-span-full text-center p-4 bg-red-100 text-red-700 rounded-lg">Error loading summary: ${error.message}</div>`;
+        }
+    }
+
+
+
 
     /**
      * Fetches a page of tickets and renders them as cards on the dashboard.
@@ -223,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSidebar();
     renderHeader();
     renderTickets();
+    renderDashboardAnalytics(); // <-- CALL THE NEW FUNCTION
 
     // --- 4. EVENT LISTENERS ---
     const signOutButton = document.getElementById('signout-button');

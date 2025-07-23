@@ -100,29 +100,20 @@ app.post('/login', async (req, res) => {
 app.get('/tickets', authMiddleware, async (req, res) => {
     try {
         const { role, name, office } = req.user; // Get user details from the JWT
-
-        // Pagination parameters
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-
-        // Filter and Search parameters from the frontend
         const { status, search } = req.query;
-        
-        // --- NEW: Build the base query based on user role ---
         const queryFilter = {};
 
         if (role.includes('ICTO')) {
             // ICTO Staff/Head sees all tickets
         } else if (role === 'Department Head') {
-            // Department Head sees all tickets from their office
             queryFilter.requesterOffice = office;
         } else {
-            // Regular Employee sees only their own tickets
             queryFilter.requesterName = name;
         }
 
-        // Add frontend filters to the base query
         if (status && status !== 'All') {
             queryFilter.status = status;
         }
@@ -130,16 +121,9 @@ app.get('/tickets', authMiddleware, async (req, res) => {
             queryFilter.subject = { $regex: search, $options: 'i' };
         }
 
-        // Fetch total count for pagination
         const totalTickets = await Ticket.countDocuments(queryFilter);
         const totalPages = Math.ceil(totalTickets / limit);
-
-        // Fetch paginated tickets
-        const tickets = await Ticket.find(queryFilter)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
+        const tickets = await Ticket.find(queryFilter).sort({ createdAt: -1 }).skip(skip).limit(limit);
         const responseTickets = tickets.map(t => ({ ...t.toObject(), id: t._id }));
 
         res.status(200).json({
@@ -147,7 +131,6 @@ app.get('/tickets', authMiddleware, async (req, res) => {
             currentPage: page,
             totalPages: totalPages
         });
-
     } catch (error) {
         res.status(500).json({ message: 'Error fetching tickets', error: error.message });
     }
@@ -275,6 +258,45 @@ app.delete('/users/:id', authMiddleware, async (req, res) => {
         res.status(200).json({ message: 'User deleted successfully.' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting user', error: error.message });
+    }
+});
+
+app.get('/analytics/dashboard-summary', authMiddleware, async (req, res) => {
+    try {
+        const { role, name, office } = req.user;
+        const queryFilter = {};
+
+        // Build the filter based on the user's role
+        if (role.includes('ICTO')) {
+            // For ICTO, show system-wide stats
+        } else if (role === 'Department Head') {
+            queryFilter.requesterOffice = office;
+        } else { // Regular Employee
+            queryFilter.requesterName = name;
+        }
+
+        // Run queries in parallel to get the stats
+        const [
+            totalTickets,
+            newTickets,
+            inProgressTickets,
+            resolvedTickets
+        ] = await Promise.all([
+            Ticket.countDocuments(queryFilter),
+            Ticket.countDocuments({ ...queryFilter, status: 'New' }),
+            Ticket.countDocuments({ ...queryFilter, status: 'In Progress' }),
+            Ticket.countDocuments({ ...queryFilter, status: 'Resolved' })
+        ]);
+
+        res.status(200).json({
+            total: totalTickets,
+            new: newTickets,
+            inProgress: inProgressTickets,
+            resolved: resolvedTickets
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching dashboard summary', error: error.message });
     }
 });
 
