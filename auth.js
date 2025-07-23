@@ -5,9 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
-     // --- Employee ID Inputs ---
-    const loginEmployeeIdInput = document.getElementById('login-employeeId');
-    const registerEmployeeIdInput = document.getElementById('register-employeeId');
+     
+ // --- Input Elements ---
+    const loginEmploymentType = document.getElementById('login-employmentType');
+    const loginEmployeeId = document.getElementById('login-employeeId');
+    const registerEmploymentType = document.getElementById('register-employmentType');
+    const registerEmployeeId = document.getElementById('register-employeeId');
+
 
     // --- Message Elements ---
     const loginMessage = document.getElementById('login-message');
