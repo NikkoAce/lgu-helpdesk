@@ -64,7 +64,7 @@ const authMiddleware = (req, res, next) => {
 // --- PUBLIC ROUTES ---
 app.post('/register', async (req, res) => {
     try {
-        const { employeeId, name, role, password, office } = req.body;
+        const { employeeId, name, role, password, office, email } = req.body;
         if (!employeeId || !name || !role || !password || !office || !email) return res.status(400).json({ message: 'All fields are required.' });
         const existingUser = await User.findOne({ employeeId });
         if (existingUser) return res.status(400).json({ message: 'Employee ID already registered.' });
