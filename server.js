@@ -94,7 +94,7 @@ app.post('/register', async (req, res) => {
         if (existingUser) return res.status(400).json({ message: 'Employee ID already registered.' });
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = new User({ employeeId, name, role, office, email, password: hashedPassword });
+        const newUser = new User({ employeeId, employmentType, name, role, office, email, password: hashedPassword });
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
