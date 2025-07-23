@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = document.getElementById('submit-button');
 
     const subCategories = {
-        Hardware: ['Laptop/Desktop Issue', 'Monitor/Peripherals', 'Biometrics Machine'],
-        Software: ['MS Office', 'Antivirus', 'e-Tax System', 'Other Application'],
-        Network: ['No Internet Connection', 'Slow Connection', 'Wi-Fi Access'],
-        Printer: ['Not Printing', 'Paper Jam', 'Toner/Ink Replacement'],
+        Hardware: ['Laptop/Desktop Issue', 'Monitor/Peripherals', 'Biometrics Machine', 'Hardware Initial Setup', 'Others'],
+        Software: ['MS Office','Operating System', 'Antivirus', 'e-Tax System', 'ECPAC System', 'Other Application', 'Others'],
+        Network: ['No Internet Connection', 'Slow Connection', 'Wi-Fi Access', 'Others'],
+        Printer: ['Not Printing', 'Paper Jam', 'Toner/Ink Replacement', 'Reset', 'Initial Setup of Printer', 'Others'],
         Account: ['Password Reset', 'New Account Request', 'Permission Issue']
     };
 
