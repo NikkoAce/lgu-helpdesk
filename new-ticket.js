@@ -2,9 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for logged-in user first
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser) {
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
         return;
     }
+
+    const token = localStorage.getItem('authToken');
 
     const categorySelect = document.getElementById('category');
     const subCategorySelect = document.getElementById('sub-category');
@@ -67,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Ticket created successfully! Redirecting...');
             ticketForm.reset();
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'app.html';
             }, 2000);
 
         } catch (error) {

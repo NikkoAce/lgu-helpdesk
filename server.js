@@ -34,11 +34,13 @@ const ticketSchema = new mongoose.Schema({
     comments: [commentSchema]
 });
 
+
 const userSchema = new mongoose.Schema({
     employeeId: { type: String, required: true, unique: true },
     name: String,
     role: String,
     office: String,
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true }
 });
 
@@ -63,12 +65,12 @@ const authMiddleware = (req, res, next) => {
 app.post('/register', async (req, res) => {
     try {
         const { employeeId, name, role, password, office } = req.body;
-        if (!employeeId || !name || !role || !password || !office) return res.status(400).json({ message: 'All fields are required.' });
+        if (!employeeId || !name || !role || !password || !office || !email) return res.status(400).json({ message: 'All fields are required.' });
         const existingUser = await User.findOne({ employeeId });
         if (existingUser) return res.status(400).json({ message: 'Employee ID already registered.' });
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = new User({ employeeId, name, role, office, password: hashedPassword });
+        const newUser = new User({ employeeId, name, role, office, email, password: hashedPassword });
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
@@ -84,7 +86,7 @@ app.post('/login', async (req, res) => {
         if (!user) return res.status(401).json({ message: 'Invalid Employee ID or Password.' });
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid Employee ID or Password.' });
-        const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office } };
+        const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
         jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
             res.status(200).json({ token });
