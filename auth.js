@@ -28,32 +28,49 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.classList.remove('hidden');
     });
 
-  // --- NEW: Auto-formatting function for Employee ID ---
-    const formatEmployeeId = (input) => {
-        let value = input.value.replace(/\D/g, ''); // Remove all non-digits
-        let formattedValue = '';
-
-        if (value.length > 0) {
-            formattedValue += value.substring(0, 1);
+// --- NEW: Function to update Employee ID input attributes ---
+    const updateEmployeeIdInput = (type, inputElement) => {
+        if (type === 'Permanent') {
+            inputElement.placeholder = '0-00-000-000';
+            inputElement.pattern = '\\d{1}-\\d{2}-\\d{3}-\\d{3}';
+            inputElement.maxLength = 12;
+            inputElement.title = 'Format: 0-00-000-000';
+        } else { // Job Order
+            inputElement.placeholder = 'JO-00-000-00000';
+            inputElement.pattern = 'JO-\\d{2}-\\d{3}-\\d{5}';
+            inputElement.maxLength = 12;
+            inputElement.title = 'Format: JO-00-000-00000 (e.g., JO-02-123-45678)';
         }
-        if (value.length > 1) {
-            formattedValue += '-' + value.substring(1, 3);
-        }
-        if (value.length > 3) {
-            formattedValue += '-' + value.substring(3, 6);
-        }
-        if (value.length > 6) {
-            formattedValue += '-' + value.substring(6, 9);
-        }
-        input.value = formattedValue;
+        inputElement.value = ''; // Clear the input when type changes
     };
 
-    // --- NEW: Apply formatting to both ID inputs ---
-    loginEmployeeIdInput.addEventListener('input', () => formatEmployeeId(loginEmployeeIdInput));
-    registerEmployeeIdInput.addEventListener('input', () => formatEmployeeId(registerEmployeeIdInput));
 
+ // --- NEW: Function to auto-format the ID as the user types ---
+    const formatEmployeeId = (type, inputElement) => {
+        if (type === 'Permanent') {
+            let value = inputElement.value.replace(/\D/g, '');
+            let formatted = '';
+            if (value.length > 0) formatted += value.substring(0, 1);
+            if (value.length > 1) formatted += '-' + value.substring(1, 3);
+            if (value.length > 3) formatted += '-' + value.substring(3, 6);
+            if (value.length > 6) formatted += '-' + value.substring(6, 9);
+            inputElement.value = formatted;
+        } else { // Job Order
+            let value = inputElement.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+            inputElement.value = value;
+        }
+    };
 
+    // --- NEW: Event Listeners for the dropdowns ---
+    loginEmploymentType.addEventListener('change', () => updateEmployeeIdInput(loginEmploymentType.value, loginEmployeeId));
+    registerEmploymentType.addEventListener('change', () => updateEmployeeIdInput(registerEmploymentType.value, registerEmployeeId));
 
+    loginEmployeeId.addEventListener('input', () => formatEmployeeId(loginEmploymentType.value, loginEmployeeId));
+    registerEmployeeId.addEventListener('input', () => formatEmployeeId(registerEmploymentType.value, registerEmployeeId));
+
+       // --- Initialize the inputs on page load ---
+    updateEmployeeIdInput(loginEmploymentType.value, loginEmployeeId);
+    updateEmployeeIdInput(registerEmploymentType.value, registerEmployeeId);
 
     // --- Login Form Submission ---
     loginForm.addEventListener('submit', async (event) => {
