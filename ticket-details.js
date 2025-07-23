@@ -111,54 +111,72 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         commentList.innerHTML = comments.map(comment => `
-            <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="flex items-center justify-between"><p class="font-semibold text-gray-800">${comment.author}</p><p class="text-xs text-gray-500">${new Date(comment.createdAt).toLocaleString()}</p></div>
+            <div class="rounded-lg border bg-white p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="font-semibold text-gray-800">${comment.author}</p>
+                    <p class="text-xs text-gray-500">${new Date(comment.createdAt).toLocaleString()}</p>
+                </div>
                 <p class="mt-2 text-gray-700 whitespace-pre-wrap">${comment.content}</p>
-            </div>`).join('');
+                ${comment.attachmentUrl ? `
+                <div class="mt-3">
+                    <a href="${comment.attachmentUrl}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-sky-600 hover:underline">View Attachment</a>
+                </div>
+                ` : ''}
+            </div>
+        `).join('');
     }
 
-  function setupCommentForm() {
+    function setupCommentForm() {
         const commentForm = document.getElementById('comment-form');
+        const attachmentInput = document.getElementById('attachment');
+        const filePreview = document.getElementById('file-preview');
         if (!commentForm) return;
+
+        attachmentInput.addEventListener('change', () => {
+            if (attachmentInput.files.length > 0) {
+                filePreview.textContent = `Selected file: ${attachmentInput.files[0].name}`;
+            } else {
+                filePreview.textContent = '';
+            }
+        });
 
         commentForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-            
             const submitButton = commentForm.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
-            const content = event.target.content.value.trim();
 
-            if (!content) {
-                showToast('Comment cannot be empty.', 'error');
-                return;
+            // Use FormData to send both text and file
+            const formData = new FormData();
+            formData.append('content', document.getElementById('comment-content').value);
+            if (attachmentInput.files.length > 0) {
+                formData.append('attachment', attachmentInput.files[0]);
             }
 
-            // --- Set Loading State ---
+            // Set loading state
             submitButton.disabled = true;
-            submitButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Submitting...
-            `;
-            
+            submitButton.innerHTML = 'Submitting...';
+
             try {
                 const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}/comments`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ content })
+                    headers: {
+                        // IMPORTANT: Do NOT set Content-Type header.
+                        // The browser will automatically set it to multipart/form-data with the correct boundary.
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
                 });
                 if (!response.ok) throw new Error((await response.json()).message);
                 
                 const updatedComments = await response.json();
                 renderComments(updatedComments);
                 event.target.reset();
+                filePreview.textContent = '';
+                showToast('Reply submitted successfully!');
 
             } catch (error) {
                 showToast(`Error: ${error.message}`, 'error');
             } finally {
-                // --- Restore Button State ---
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
             }

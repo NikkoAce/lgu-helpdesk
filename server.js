@@ -4,6 +4,9 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
@@ -12,13 +15,33 @@ const PORT = 3000;
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 
+
+
+// --- NEW: Cloudinary Configuration ---
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'lgu-helpdesk-attachments', // A folder name in your Cloudinary account
+        allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+    },
+});
+
+const upload = multer({ storage: storage });
+
+
 // Middleware & Connection
 app.use(cors());
 app.use(express.json());
 mongoose.connect(MONGO_URI).then(() => console.log('MongoDB Connected')).catch(err => console.error(err));
 
 // --- SCHEMAS & MODELS ---
-const commentSchema = new mongoose.Schema({ author: String, content: String, createdAt: { type: Date, default: Date.now } });
+const commentSchema = new mongoose.Schema({ author: String, content: String, attachmentUrl: String, createdAt: { type: Date, default: Date.now } });
 
 const ticketSchema = new mongoose.Schema({
     subject: String,
@@ -157,14 +180,26 @@ app.get('/tickets/:id', authMiddleware, async (req, res) => {
     }
 });
 
-app.post('/tickets/:id/comments', authMiddleware, async (req, res) => {
+app.post('/tickets/:id/comments', authMiddleware, upload.single('attachment'), async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'Invalid Ticket ID.' });
+        
         const { content } = req.body;
         if (!content) return res.status(400).json({ message: 'Comment content is required.' });
+        
         const ticket = await Ticket.findById(req.params.id);
         if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });
-        const newComment = { author: req.user.name, content };
+        
+        const newComment = {
+            author: req.user.name,
+            content: content,
+        };
+
+        // If a file was uploaded, add its URL to the comment
+        if (req.file) {
+            newComment.attachmentUrl = req.file.path;
+        }
+
         ticket.comments.push(newComment);
         await ticket.save();
         res.status(201).json(ticket.comments);
