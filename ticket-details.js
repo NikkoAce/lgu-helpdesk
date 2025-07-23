@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 1. SETUP & AUTH ---
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) { window.location.href = 'login.html'; return; }
+    // UPDATED: Redirect to index.html (the new auth page)
+    if (!currentUser) { window.location.href = 'index.html'; return; } 
     const token = localStorage.getItem('authToken');
 
     // --- 2. DOM ELEMENT REFERENCES ---
@@ -78,7 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                                     <label for="comment-content" class="text-sm font-medium text-gray-700">Add a reply</label>
                                     <textarea id="comment-content" name="content" rows="4" required class="mt-2 w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" placeholder="Type your message..."></textarea>
-                                    <div id="comment-error" class="text-sm text-red-600 mt-1"></div>
+                                    
+                                    <!-- FIXED: Added the file input HTML here -->
+                                    <div class="mt-3">
+                                        <label for="attachment" class="text-sm font-medium text-gray-700">Attach a file (optional)</label>
+                                        <input type="file" id="attachment" name="attachment" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"/>
+                                        <p id="file-preview" class="mt-2 text-sm text-gray-600"></p>
+                                    </div>
+
                                     <div class="mt-3 text-right">
                                         <button type="submit" class="inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">Submit Reply</button>
                                     </div>
@@ -103,14 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'bg-blue-100 text-blue-800'; // Default for 'New'
     }
 
-    function renderComments(comments) {
+     function renderComments(comments) {
         const commentList = document.getElementById('comment-list');
         if (!commentList) return;
         if (comments.length === 0) {
             commentList.innerHTML = '<div class="text-center py-4"><p class="text-gray-500">No comments yet.</p></div>';
             return;
         }
-        commentList.innerHTML = comments.map(comment => `
+        commentList.innerHTML = comments.map(comment => {
+            // NEW: Conditionally render the delete button for ICTO staff
+            const showDeleteButton = currentUser.role.includes('ICTO') && comment.attachmentUrl;
+            
+            return `
             <div class="rounded-lg border bg-white p-4 shadow-sm">
                 <div class="flex items-center justify-between">
                     <p class="font-semibold text-gray-800">${comment.author}</p>
@@ -118,19 +130,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <p class="mt-2 text-gray-700 whitespace-pre-wrap">${comment.content}</p>
                 ${comment.attachmentUrl ? `
-                <div class="mt-3">
+                <div class="mt-3 flex items-center space-x-4">
                     <a href="${comment.attachmentUrl}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-sky-600 hover:underline">View Attachment</a>
+                    ${showDeleteButton ? `
+                    <button data-comment-id="${comment._id}" class="delete-attachment-btn text-sm font-medium text-red-600 hover:underline">Delete</button>
+                    ` : ''}
                 </div>
                 ` : ''}
             </div>
-        `).join('');
+        `}).join('');
+        
+        // NEW: After rendering, set up the event listeners for the new buttons
+        setupDeleteAttachmentListeners();
     }
 
     function setupCommentForm() {
         const commentForm = document.getElementById('comment-form');
         const attachmentInput = document.getElementById('attachment');
         const filePreview = document.getElementById('file-preview');
-        if (!commentForm) return;
+        if (!commentForm || !attachmentInput || !filePreview) return; // Safety check
 
         attachmentInput.addEventListener('change', () => {
             if (attachmentInput.files.length > 0) {
@@ -145,25 +163,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const submitButton = commentForm.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
 
-            // Use FormData to send both text and file
             const formData = new FormData();
             formData.append('content', document.getElementById('comment-content').value);
             if (attachmentInput.files.length > 0) {
                 formData.append('attachment', attachmentInput.files[0]);
             }
 
-            // Set loading state
             submitButton.disabled = true;
             submitButton.innerHTML = 'Submitting...';
 
             try {
                 const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}/comments`, {
                     method: 'POST',
-                    headers: {
-                        // IMPORTANT: Do NOT set Content-Type header.
-                        // The browser will automatically set it to multipart/form-data with the correct boundary.
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
                 if (!response.ok) throw new Error((await response.json()).message);
@@ -214,12 +226,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusBadge.textContent = updatedTicket.status;
                 statusBadge.className = `text-lg font-medium px-4 py-1.5 rounded-full ${getBadgeColor(updatedTicket.status)}`;
                 showToast('Status updated successfully!'); 
-                updateMessage.classList.add('text-green-600');
             } catch (error) {
                 showToast(`Error: ${error.message}`, 'error');
             }
         });
     }
 
+
+
+     function setupDeleteAttachmentListeners() {
+        const deleteButtons = document.querySelectorAll('.delete-attachment-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const commentId = e.target.dataset.commentId;
+                
+                // Use a simple confirmation dialog
+                if (!confirm('Are you sure you want to permanently delete this attachment? This action cannot be undone.')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`https://lgu-helpdesk-api.onrender.com/tickets/${ticketId}/comments/${commentId}/attachment`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error((await response.json()).message);
+                    
+                    showToast('Attachment deleted successfully!');
+                    // Refresh the ticket details to show the change
+                    fetchTicketDetails();
+
+                } catch (error) {
+                    showToast(`Error: ${error.message}`, 'error');
+                }
+            });
+        });
+    }
     fetchTicketDetails();
 });

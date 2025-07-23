@@ -222,6 +222,52 @@ app.patch('/tickets/:id', authMiddleware, async (req, res) => {
     }
 });
 
+
+// --- NEW: DELETE ATTACHMENT ROUTE ---
+app.delete('/tickets/:ticketId/comments/:commentId/attachment', authMiddleware, async (req, res) => {
+    // Security: Only allow ICTO staff to delete attachments
+    if (!req.user.role || !req.user.role.includes('ICTO')) {
+        return res.status(403).json({ message: 'Forbidden: You do not have permission to perform this action.' });
+    }
+
+    try {
+        const { ticketId, commentId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(ticketId) || !mongoose.Types.ObjectId.isValid(commentId)) {
+            return res.status(400).json({ message: 'Invalid ID format.' });
+        }
+
+        const ticket = await Ticket.findById(ticketId);
+        if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });
+
+        const comment = ticket.comments.id(commentId);
+        if (!comment) return res.status(404).json({ message: 'Comment not found.' });
+        if (!comment.attachmentUrl) return res.status(400).json({ message: 'Comment has no attachment.' });
+
+        // Extract the public ID from the Cloudinary URL
+        const urlParts = comment.attachmentUrl.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = publicIdWithExtension.split('.')[0];
+        const folder = urlParts[urlParts.length - 2];
+        const fullPublicId = `${folder}/${publicId}`;
+
+        // Tell Cloudinary to delete the file
+        await cloudinary.uploader.destroy(fullPublicId);
+
+        // Remove the URL from the comment in the database
+        comment.attachmentUrl = undefined;
+        await ticket.save();
+
+        res.status(200).json({ message: 'Attachment deleted successfully.', ticket });
+
+    } catch (error) {
+        console.error('Error deleting attachment:', error);
+        res.status(500).json({ message: 'Error deleting attachment', error: error.message });
+    }
+});
+
+
+
+
 // --- ANALYTICS ROUTE ---
 app.get('/analytics/summary', authMiddleware, async (req, res) => {
     try {
