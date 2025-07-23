@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { // Job Order
             inputElement.placeholder = 'JO-00-000-00000';
             inputElement.pattern = 'JO-\\d{2}-\\d{3}-\\d{5}';
-            inputElement.maxLength = 12;
+            inputElement.maxLength = 15;
             inputElement.title = 'Format: JO-00-000-00000 (e.g., JO-02-123-45678)';
         }
         inputElement.value = ''; // Clear the input when type changes
@@ -51,18 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
  // --- NEW: Function to auto-format the ID as the user types ---
     const formatEmployeeId = (type, inputElement) => {
+        let value = inputElement.value.replace(/[^0-9]/g, ''); // Remove all non-digits for formatting
+        let formatted = '';
+
         if (type === 'Permanent') {
-            let value = inputElement.value.replace(/\D/g, '');
-            let formatted = '';
             if (value.length > 0) formatted += value.substring(0, 1);
             if (value.length > 1) formatted += '-' + value.substring(1, 3);
             if (value.length > 3) formatted += '-' + value.substring(3, 6);
             if (value.length > 6) formatted += '-' + value.substring(6, 9);
-            inputElement.value = formatted;
         } else { // Job Order
-            let value = inputElement.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-            inputElement.value = value;
+            formatted = 'JO-';
+            if (value.length > 0) formatted += value.substring(0, 2);
+            if (value.length > 2) formatted += '-' + value.substring(2, 5);
+            if (value.length > 5) formatted += '-' + value.substring(5, 10);
         }
+        inputElement.value = formatted;
     };
 
     // --- NEW: Event Listeners for the dropdowns ---
