@@ -99,18 +99,55 @@ app.post('/login', async (req, res) => {
 // --- PROTECTED TICKET ROUTES ---
 app.get('/tickets', authMiddleware, async (req, res) => {
     try {
+        const { role, name, office } = req.user; // Get user details from the JWT
+
+        // Pagination parameters
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
+
+        // Filter and Search parameters from the frontend
         const { status, search } = req.query;
+        
+        // --- NEW: Build the base query based on user role ---
         const queryFilter = {};
-        if (status && status !== 'All') queryFilter.status = status;
-        if (search) queryFilter.$or = [{ subject: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
+
+        if (role.includes('ICTO')) {
+            // ICTO Staff/Head sees all tickets
+        } else if (role === 'Department Head') {
+            // Department Head sees all tickets from their office
+            queryFilter.requesterOffice = office;
+        } else {
+            // Regular Employee sees only their own tickets
+            queryFilter.requesterName = name;
+        }
+
+        // Add frontend filters to the base query
+        if (status && status !== 'All') {
+            queryFilter.status = status;
+        }
+        if (search) {
+            queryFilter.subject = { $regex: search, $options: 'i' };
+        }
+
+        // Fetch total count for pagination
         const totalTickets = await Ticket.countDocuments(queryFilter);
         const totalPages = Math.ceil(totalTickets / limit);
-        const tickets = await Ticket.find(queryFilter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+        // Fetch paginated tickets
+        const tickets = await Ticket.find(queryFilter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
         const responseTickets = tickets.map(t => ({ ...t.toObject(), id: t._id }));
-        res.status(200).json({ tickets: responseTickets, currentPage: page, totalPages: totalPages });
+
+        res.status(200).json({
+            tickets: responseTickets,
+            currentPage: page,
+            totalPages: totalPages
+        });
+
     } catch (error) {
         res.status(500).json({ message: 'Error fetching tickets', error: error.message });
     }

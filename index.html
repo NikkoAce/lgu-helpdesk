@@ -12,21 +12,26 @@
 
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
 
-        <!-- Login Form (Visible by default) -->
+        <!-- Login Form -->
         <div id="login-view">
             <h2 class="text-2xl font-bold text-center text-gray-800">LGU Helpdesk Login</h2>
             <form id="login-form" class="mt-6 space-y-6">
                 <div>
                     <label for="login-employeeId" class="text-sm font-medium text-gray-700">Employee ID</label>
-                    <input id="login-employeeId" name="employeeId" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    <!-- UPDATED: Added pattern and maxlength for validation -->
+                    <input id="login-employeeId" name="employeeId" type="text" required 
+                           pattern="\d{1}-\d{2}-\d{3}-\d{3}" maxlength="12"
+                           placeholder="0-00-000-000"
+                           title="Format: 0-00-000-000"
+                           class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
                 </div>
                 <div>
                     <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
-                    <input id="login-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    <input id="login-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border rounded-md">
                 </div>
                 <p id="login-message" class="text-sm text-red-600"></p>
                 <div>
-                    <button type="submit" class="w-full px-4 py-2 font-medium text-white bg-sky-600 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
+                    <button type="submit" class="w-full px-4 py-2 font-medium text-white bg-sky-600 rounded-md hover:bg-sky-700">
                         Sign In
                     </button>
                 </div>

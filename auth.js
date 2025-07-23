@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
+     // --- Employee ID Inputs ---
+    const loginEmployeeIdInput = document.getElementById('login-employeeId');
+    const registerEmployeeIdInput = document.getElementById('register-employeeId');
+
     // --- Message Elements ---
     const loginMessage = document.getElementById('login-message');
     const registerMessage = document.getElementById('register-message');
@@ -23,6 +27,33 @@ document.addEventListener('DOMContentLoaded', () => {
         registerView.classList.add('hidden');
         loginView.classList.remove('hidden');
     });
+
+  // --- NEW: Auto-formatting function for Employee ID ---
+    const formatEmployeeId = (input) => {
+        let value = input.value.replace(/\D/g, ''); // Remove all non-digits
+        let formattedValue = '';
+
+        if (value.length > 0) {
+            formattedValue += value.substring(0, 1);
+        }
+        if (value.length > 1) {
+            formattedValue += '-' + value.substring(1, 3);
+        }
+        if (value.length > 3) {
+            formattedValue += '-' + value.substring(3, 6);
+        }
+        if (value.length > 6) {
+            formattedValue += '-' + value.substring(6, 9);
+        }
+        input.value = formattedValue;
+    };
+
+    // --- NEW: Apply formatting to both ID inputs ---
+    loginEmployeeIdInput.addEventListener('input', () => formatEmployeeId(loginEmployeeIdInput));
+    registerEmployeeIdInput.addEventListener('input', () => formatEmployeeId(registerEmployeeIdInput));
+
+
+
 
     // --- Login Form Submission ---
     loginForm.addEventListener('submit', async (event) => {
