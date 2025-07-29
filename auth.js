@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginMessage.textContent = '';
 
         try {
-            const response = await fetch('https://lgu-helpdesk-api.onrender.com/login', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(loginData)
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         registerMessage.className = 'text-sm';
 
         try {
-            const response = await fetch('https://lgu-helpdesk-api.onrender.com/register', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registerData)

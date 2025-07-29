@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!statsContainer) return;
 
         try {
-            const response = await fetch('https://lgu-helpdesk-api.onrender.com/analytics/dashboard-summary', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/analytics/dashboard-summary', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error((await response.json()).message);
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const loadingMessage = document.getElementById('loading-message');
         try {
-            const url = new URL('https://lgu-helpdesk-api.onrender.com/tickets');
+            const url = new URL('https://lgu-helpdesk-copy.onrender.com/tickets');
             url.searchParams.append('page', dashboardCurrentPage);
             url.searchParams.append('limit', 5); // Show 5 tickets per page on dashboard
 

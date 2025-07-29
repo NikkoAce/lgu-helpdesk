@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 3. CORE FUNCTIONS ---
     async function fetchAndRenderAnalytics() {
         try {
-            const response = await fetch('https://lgu-helpdesk-api.onrender.com/analytics/summary', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/analytics/summary', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error((await response.json()).message);
