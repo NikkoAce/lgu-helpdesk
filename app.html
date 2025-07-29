@@ -10,20 +10,18 @@
     <script src="app.js" defer></script>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
+    <div class="relative min-h-screen lg:flex">
+        <!-- Mobile Overlay -->
+        <div id="overlay" class="fixed inset-0 z-20 bg-black bg-opacity-50 hidden lg:hidden"></div>
         <!-- Sidebar -->
-        <aside class="flex w-64 flex-col bg-slate-900 text-white">
-            <div class="flex h-32 items-center justify-center gap-3 border-b border-slate-700 px-4">
-        <!-- New Sidebar Header with Image Logo -->
+         <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-slate-900 text-white transform -translate-x-full transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0">
             <div class="flex h-32 flex-col items-center justify-center border-b border-slate-700 px-4">
         <!-- Logo Image -->
             <img src="/logo/LGU-DAET LOGO.jpg" alt="LGU Logo" class="h-16 w-16 rounded-full object-contain">
     
          <!-- Title -->
          <span class="text-lg font-bold text-white">LGU-Daet IT Helpdesk</span>
-        </div>
-            </div>
-              
+        </div>             
             <!-- Navigation links will be injected here by JavaScript -->
             <nav id="sidebar-nav" class="flex-1 space-y-2 p-4"></nav>
         </aside>
