@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ticketData = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/tickets', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/tickets', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(ticketData)

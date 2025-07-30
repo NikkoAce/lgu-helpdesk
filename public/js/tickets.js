@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading tickets...</td></tr>`;
 
         // Build the URL with query parameters
-        const url = new URL('https://lgu-helpdesk-copy.onrender.com/tickets');
+        const url = new URL('https://lgu-helpdesk-copy.onrender.com/api/tickets');
         url.searchParams.append('page', currentPage);
         url.searchParams.append('limit', 10); // Show 10 tickets per page
         if (currentStatus !== 'All') {

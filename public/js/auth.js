@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         registerMessage.className = 'text-sm';
 
         try {
-            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/authregister', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registerData)

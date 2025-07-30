@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show a loading state in the table
         tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading users...</td></tr>`;
         try {
-            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/users', {
+            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error((await response.json()).message);
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/users/${selectedUserId}`, {
+            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/users/${selectedUserId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(updatedData)
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteMessage.textContent = 'Deleting...';
         deleteMessage.className = 'mt-4 text-sm text-gray-600';
         try {
-            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/users/${selectedUserId}`, {
+            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/users/${selectedUserId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
