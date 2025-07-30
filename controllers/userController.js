@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
+
+
 exports.getAllUsers = async (req, res) => {
     // ... (logic for fetching all users)
     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
