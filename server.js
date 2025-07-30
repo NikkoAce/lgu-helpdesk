@@ -5,19 +5,17 @@ const mongoose = require('mongoose');
 
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// --- CONFIGURATION ---
+// --- CONFIGURATION & MIDDLEWARE---
 const MONGO_URI = process.env.MONGO_URI;
-
-
-
-// Middleware & Connection
 app.use(cors());
 app.use(express.json());
 
 // --- DATABASE CONNECTION ---
-mongoose.connect(MONGO_URI).then(() => console.log('MongoDB Connected')).catch(err => console.error(err));
+mongoose.connect(MONGO_URI)
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.error('MongoDB connection error:',err));
 
 
 
