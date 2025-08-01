@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('currentUser');
             localStorage.removeItem('authToken');
             // UPDATED: Redirect to the new auth.html page
-            window.location.href = 'index.html';
+            window.location.href = 'https://lgu-employee-portal.netlify.app/index.html'; 
         });
     }
 
