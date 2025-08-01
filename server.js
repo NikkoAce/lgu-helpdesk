@@ -9,7 +9,22 @@ const PORT = process.env.PORT || 3000;
 
 // --- CONFIGURATION & MIDDLEWARE---
 const MONGO_URI = process.env.MONGO_URI;
-app.use(cors());
+// Define allowed origins
+const allowedOrigins = [
+    'https://lgu-employee-portal.netlify.app',
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static('public'));
 
