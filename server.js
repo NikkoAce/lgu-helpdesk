@@ -12,6 +12,8 @@ const MONGO_URI = process.env.MONGO_URI;
 // Define allowed origins
 const allowedOrigins = [
     'https://lgu-employee-portal.netlify.app',
+    'https://lgu-ithelpdesk.netlify.app',
+    'http://127.0.0.1:5501'
 ];
 
 const corsOptions = {
@@ -28,7 +30,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
-app.use(express.static('public'));
 
 // --- DATABASE CONNECTION ---
 mongoose.connect(MONGO_URI)
