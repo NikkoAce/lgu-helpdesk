@@ -60,29 +60,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. NEW: SINGLE SIGN-ON (SSO) LOGIC ---
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get('token');
-    const PORTAL_LOGIN_URL = 'https://your-lgu-portal.netlify.app/index.html'; // Replace with your actual portal URL
+    const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html'; // Your actual portal URL
 
     if (tokenFromUrl) {
-        // If a token is found in the URL, save it and the user info
         localStorage.setItem('authToken', tokenFromUrl);
         try {
             const payload = JSON.parse(atob(tokenFromUrl.split('.')[1]));
             localStorage.setItem('currentUser', JSON.stringify(payload.user));
-            
-            // Clean the token from the URL for security
             window.history.replaceState({}, document.title, window.location.pathname);
         } catch (e) {
             console.error("Invalid token from URL, redirecting to portal login.");
             window.location.href = PORTAL_LOGIN_URL;
+            return; // Stop execution if token is bad
         }
     }
 
     // --- 2. STANDARD AUTHENTICATION CHECK ---
-    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+    // This now correctly defines currentUser for the whole script
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const token = localStorage.getItem('authToken');
 
-    // If, after all checks, there is no user, redirect to the central portal
-    if (!storedUser || !token) {
+    if (!currentUser || !token) {
         window.location.href = PORTAL_LOGIN_URL;
         return; // Stop script execution
     }
