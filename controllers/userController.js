@@ -59,3 +59,20 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ message: 'Error deleting user', error: error.message });
     }
 };
+
+/**
+ * @desc    Get the currently logged-in user's data based on their token.
+ *          This is used by other systems to verify a user's identity.
+ */
+exports.getMe = async (req, res) => {
+    try {
+        // The portal's own auth middleware will have decoded the token and put the user's ID on req.user.id
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
