@@ -167,9 +167,12 @@ exports.resetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Update the user's password and clear the reset token fields
-        await User.updateOne({ _id: user._id }, {
+        const updateResult = await User.updateOne({ _id: user._id }, {
             $set: { password: hashedPassword, passwordResetToken: undefined, passwordResetExpires: undefined }
         });
+
+        // --- DEBUGGING: Log the result of the update operation ---
+        console.log('Password update result:', updateResult);
 
         res.status(200).json({ message: 'Password has been reset successfully.' });
 
