@@ -47,7 +47,7 @@ exports.loginUser = async (req, res) => {
         res.cookie('portalAuthToken', token, {
             httpOnly: true, // Inaccessible to JavaScript
             secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-            sameSite: 'Strict', // Mitigates CSRF attacks
+            sameSite: 'None', // Allows cross-domain cookies; requires Secure=true
             maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
         });
 
@@ -188,7 +188,7 @@ exports.logoutUser = (req, res) => {
     res.cookie('portalAuthToken', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
+        sameSite: 'None', // Must match the setting used during login
         expires: new Date(0) // Expire the cookie immediately
     });
 
