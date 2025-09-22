@@ -155,9 +155,12 @@ exports.resetPassword = async (req, res) => {
         // 3. Set the new password
         const { password } = req.body;
 
-        // Add validation to ensure a new password is provided and meets minimum length
-        if (!password || password.length < 6) {
-            return res.status(400).json({ message: 'Password is required and must be at least 6 characters long.' });
+        // --- UPDATED: Enforce strong password policy ---
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!password || !passwordRegex.test(password)) {
+            return res.status(400).json({
+                message: 'Password does not meet strength requirements. It must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.'
+            });
         }
 
         const salt = await bcrypt.genSalt(10);
