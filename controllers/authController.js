@@ -2,7 +2,7 @@ const User = require('../models/User'); // We will create this model file next
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const SibApiV3Sdk = require('@sendinblue/client'); // Brevo SDK
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -85,39 +85,38 @@ exports.forgotPassword = async (req, res) => {
         const message = `You are receiving this email because you (or someone else) has requested to reset the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
 
         try {
-            // --- DEBUGGING: Log email configuration ---
-            console.log('--- Attempting to send email with Nodemailer ---');
-            console.log('Email Host:', process.env.EMAIL_HOST);
-            console.log('Email Port:', process.env.EMAIL_PORT);
-            console.log('Email User:', process.env.EMAIL_USERNAME);
-            // For security, we only check if the password is set, we don't log it.
-            console.log('Email Password is set:', !!process.env.EMAIL_PASSWORD);
+            // Configure API key authorization: apiKey
+            const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+            const apiKey = apiInstance.authentications['apiKey'];
+            apiKey.apiKey = process.env.BREVO_API_KEY;
 
-            const transporter = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST,
-                port: process.env.EMAIL_PORT,
-                secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
-                auth: {
-                    user: process.env.EMAIL_USERNAME,
-                    pass: process.env.EMAIL_PASSWORD,
-                },
-            });
+            const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
-            await transporter.sendMail({
-                from: '"LGU Employee Portal" <noreply@lgu-portal.com>',
-                to: user.email,
-                subject: 'Password Reset Request',
-                text: message,
-            });
+            sendSmtpEmail.subject = 'Password Reset Request';
+            // Use textContent for plain text emails
+            sendSmtpEmail.textContent = message;
+            sendSmtpEmail.sender = { name: 'LGU Employee Portal', email: process.env.BREVO_FROM_EMAIL };
+            sendSmtpEmail.to = [{ email: user.email }];
 
+            console.log('--- Attempting to send email with Brevo ---');
+
+            // Await the promise from the Brevo API
+            await apiInstance.sendTransacEmail(sendSmtpEmail);
+
+            console.log('Email sent successfully via Brevo.');
             res.status(200).json({ message: 'A password reset link has been sent to your email.' });
 
         } catch (err) {
-            console.error('Email sending error:', err);
+            console.error('Brevo Email sending error:', err);
+            if (err.body) {
+                // Brevo puts detailed errors in err.body
+                console.error('Brevo Error Body:', err.body);
+            }
             // Clear the token on failure
             await User.updateOne({ _id: user._id }, {
                 $set: { passwordResetToken: undefined, passwordResetExpires: undefined }
             });
+            
             return res.status(500).json({ message: 'Error sending email. Please try again later.' });
         }
 
