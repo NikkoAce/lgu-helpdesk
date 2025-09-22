@@ -35,9 +35,18 @@ exports.loginUser = async (req, res) => {
         if (!employeeId || !password) return res.status(400).json({ message: 'Employee ID and password are required.' });
         
         const user = await User.findOne({ employeeId });
+
+        // --- DEBUGGING: Log the user object found during login ---
+        // This will show us the password hash the system is using for comparison.
+        console.log('User found for login attempt:', user ? { _id: user._id, employeeId: user.employeeId, name: user.name, passwordHash: user.password } : null);
+
         if (!user) return res.status(401).json({ message: 'Invalid credentials.' });
         
         const isMatch = await bcrypt.compare(password, user.password);
+
+        // --- DEBUGGING: Log the result of the password comparison ---
+        console.log('Password comparison result (isMatch):', isMatch);
+
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
 
         const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
