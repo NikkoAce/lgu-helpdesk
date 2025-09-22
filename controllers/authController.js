@@ -37,19 +37,7 @@ exports.loginUser = async (req, res) => {
         const user = await User.findOne({ employeeId });
         if (!user) return res.status(401).json({ message: 'Invalid credentials.' });
 
-        let isMatch = await bcrypt.compare(password, user.password);
-
-        // --- DIAGNOSTIC STEP ---
-        // If the first password check fails, it might be due to a very small delay in database
-        // replication (a "stale read"). We will wait for one second and try again.
-        // This helps confirm if the issue is timing-related.
-        if (!isMatch) {
-            console.log('Initial password match failed. Retrying after 1 second to account for potential replication lag...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            const freshUser = await User.findOne({ employeeId });
-            if (freshUser) isMatch = await bcrypt.compare(password, freshUser.password);
-        }
-
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
 
         const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
