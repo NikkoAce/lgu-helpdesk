@@ -201,3 +201,32 @@ exports.getCurrentUser = (req, res) => {
     // The payload contains non-sensitive information as defined during login.
     res.status(200).json(req.user);
 };
+
+exports.ssoRedirectGso = (req, res) => {
+    try {
+        // The user is authenticated via the HttpOnly cookie (verified by authMiddleware).
+        const userPayload = req.user;
+
+        // Create a new, short-lived token specifically for the SSO jump (e.g., 30 seconds).
+        const ssoToken = jwt.sign({ user: userPayload }, JWT_SECRET, { expiresIn: '30s' });
+
+        // Determine the target GSO environment (prod or dev) from the query parameter.
+        const targetEnv = req.query.env || 'prod';
+        const gsoFrontendUrl = targetEnv === 'dev' 
+            ? process.env.GSO_DEV_FRONTEND_URL 
+            : process.env.GSO_PROD_FRONTEND_URL;
+
+        if (!gsoFrontendUrl) {
+            console.error(`SSO Error: GSO frontend URL for env '${targetEnv}' is not defined in environment variables.`);
+            return res.status(500).send('SSO configuration error. Please contact an administrator.');
+        }
+
+        // Redirect the user's browser to the GSO system, passing the temporary SSO token.
+        const redirectUrl = `${gsoFrontendUrl}?sso_token=${ssoToken}`;
+        res.redirect(redirectUrl);
+
+    } catch (error) {
+        console.error('SSO Redirect Error:', error);
+        res.status(500).send('An error occurred during the single sign-on process.');
+    }
+};
