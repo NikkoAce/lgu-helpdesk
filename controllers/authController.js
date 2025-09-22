@@ -1,6 +1,8 @@
 const User = require('../models/User'); // We will create this model file next
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -45,5 +47,101 @@ exports.loginUser = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Error logging in', error: error.message });
+    }
+};
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        // For security, always return a success-like message
+        // to prevent attackers from checking if an email is registered.
+        if (!user) {
+            return res.status(200).json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+        }
+
+        // 1. Generate a random reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        // 2. Hash the token and set it on the user model
+        user.passwordResetToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
+
+        // 3. Set an expiry time (e.g., 15 minutes)
+        user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+
+        await user.save();
+
+        // 4. Create the reset URL for the frontend portal
+        const resetUrl = `https://lgu-employee-portal.netlify.app/reset-password.html?token=${resetToken}`;
+
+        // 5. Send the email
+        const message = `You are receiving this email because you (or someone else) has requested to reset the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
+
+        try {
+            const transporter = nodemailer.createTransport({
+                host: process.env.EMAIL_HOST,
+                port: process.env.EMAIL_PORT,
+                auth: {
+                    user: process.env.EMAIL_USERNAME,
+                    pass: process.env.EMAIL_PASSWORD,
+                },
+            });
+
+            await transporter.sendMail({
+                from: '"LGU Employee Portal" <noreply@lgu-portal.com>',
+                to: user.email,
+                subject: 'Password Reset Request',
+                text: message,
+            });
+
+            res.status(200).json({ message: 'A password reset link has been sent to your email.' });
+
+        } catch (err) {
+            console.error('Email sending error:', err);
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save();
+            return res.status(500).json({ message: 'Error sending email. Please try again later.' });
+        }
+
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        // 1. Get hashed token from URL param
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(req.params.token)
+            .digest('hex');
+
+        // 2. Find user by token and check if it's not expired
+        const user = await User.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
+        }
+
+        // 3. Set the new password
+        const { password } = req.body;
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password has been reset successfully.' });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error resetting password', error: error.message });
     }
 };
