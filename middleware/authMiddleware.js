@@ -2,15 +2,11 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.header('Authorization');
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
+    // Get token from the HttpOnly cookie
+    const token = req.cookies.portalAuthToken;
 
-    // Token is expected to be in the format "Bearer <token>"
-    const token = authHeader.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ message: 'Access denied. Malformed token.' });
+        return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
     try {

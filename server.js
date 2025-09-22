@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 
 
 const app = express();
@@ -25,11 +26,13 @@ const corsOptions = {
             return callback(new Error(msg), false);
         }
         return callback(null, true);
-    }
+    },
+    credentials: true // IMPORTANT: Allow cookies to be sent from the frontend
 };
 
 app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
+app.use(cookieParser()); // To parse cookies from incoming requests
 
 // --- NEW: Request Logger Middleware ---
 app.use((req, res, next) => {

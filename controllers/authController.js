@@ -41,10 +41,19 @@ exports.loginUser = async (req, res) => {
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
 
         const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
-        jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-            if (err) throw err;
-            res.status(200).json({ token });
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+        // Set the token in an HttpOnly cookie
+        res.cookie('portalAuthToken', token, {
+            httpOnly: true, // Inaccessible to JavaScript
+            secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+            sameSite: 'Strict', // Mitigates CSRF attacks
+            maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
         });
+
+        // Send a success response without the token in the body
+        res.status(200).json({ message: 'Login successful' });
+
     } catch (error) {
         res.status(500).json({ message: 'Error logging in', error: error.message });
     }
@@ -172,4 +181,16 @@ exports.resetPassword = async (req, res) => {
         console.error('Reset Password Error:', error);
         res.status(500).json({ message: 'Error resetting password. Please check the logs for details.' });
     }
+};
+
+exports.logoutUser = (req, res) => {
+    // Clear the cookie by setting its expiration date to the past
+    res.cookie('portalAuthToken', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        expires: new Date(0) // Expire the cookie immediately
+    });
+
+    res.status(200).json({ message: 'Logout successful' });
 };
