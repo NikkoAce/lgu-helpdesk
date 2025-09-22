@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan'); // Import morgan for logging
 
 
 const app = express();
@@ -35,11 +36,8 @@ app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
 app.use(cookieParser()); // To parse cookies from incoming requests
 
-// --- NEW: Request Logger Middleware ---
-app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-    next();
-});
+// --- Use morgan for detailed request logging ---
+app.use(morgan('dev'));
 
 // --- DATABASE CONNECTION ---
 // Add readPreference option to ensure we always get the most up-to-date data,
