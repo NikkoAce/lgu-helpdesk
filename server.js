@@ -38,7 +38,9 @@ app.use((req, res, next) => {
 });
 
 // --- DATABASE CONNECTION ---
-mongoose.connect(MONGO_URI)
+// Add readPreference option to ensure we always get the most up-to-date data,
+// preventing stale reads after writes like a password update.
+mongoose.connect(MONGO_URI, { readPreference: 'primary' })
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.error('MongoDB connection error:',err));
 

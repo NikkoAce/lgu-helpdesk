@@ -35,18 +35,9 @@ exports.loginUser = async (req, res) => {
         if (!employeeId || !password) return res.status(400).json({ message: 'Employee ID and password are required.' });
         
         const user = await User.findOne({ employeeId });
-
-        // --- DEBUGGING: Log the user object found during login ---
-        // This will show us the password hash the system is using for comparison.
-        console.log('User found for login attempt:', user ? { _id: user._id, employeeId: user.employeeId, name: user.name, passwordHash: user.password } : null);
-
         if (!user) return res.status(401).json({ message: 'Invalid credentials.' });
         
         const isMatch = await bcrypt.compare(password, user.password);
-
-        // --- DEBUGGING: Log the result of the password comparison ---
-        console.log('Password comparison result (isMatch):', isMatch);
-
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
 
         const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
@@ -115,16 +106,12 @@ exports.forgotPassword = async (req, res) => {
             sendSmtpEmail.sender = { name: 'LGU Employee Portal', email: process.env.BREVO_FROM_EMAIL };
             sendSmtpEmail.to = [{ email: user.email }];
 
-            console.log('--- Attempting to send email with Brevo ---');
-
             // Await the promise from the Brevo API
             await apiInstance.sendTransacEmail(sendSmtpEmail);
 
-            console.log('Email sent successfully via Brevo.');
             res.status(200).json({ message: 'A password reset link has been sent to your email.' });
 
         } catch (err) {
-            console.error('Brevo Email sending error:', err);
             if (err.body) {
                 // Brevo puts detailed errors in err.body
                 console.error('Brevo Error Body:', err.body);
@@ -138,7 +125,6 @@ exports.forgotPassword = async (req, res) => {
         }
 
     } catch (error) {
-        console.error('Forgot Password Error:', error);
         res.status(500).json({ message: 'Server error. Please check the logs for details.' });
     }
 };
@@ -176,16 +162,9 @@ exports.resetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Update the user's password and clear the reset token fields
-        const updateResult = await User.updateOne({ _id: user._id }, {
+        await User.updateOne({ _id: user._id }, {
             $set: { password: hashedPassword, passwordResetToken: undefined, passwordResetExpires: undefined }
         });
-
-        // --- DEBUGGING: Log the result of the update operation ---
-        console.log('Password update result:', updateResult);
-
-        // --- NEW DEBUGGING: Re-fetch user and log the new hash to confirm the write ---
-        const updatedUser = await User.findById(user._id).select('password');
-        console.log('Hash in DB immediately after update:', updatedUser.password);
 
         res.status(200).json({ message: 'Password has been reset successfully.' });
 
