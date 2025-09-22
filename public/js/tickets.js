@@ -1,41 +1,52 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. SETUP & AUTH ---
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    // Page Protection: Only allow ICTO roles to access this page
-    if (!currentUser || !currentUser.role.includes('ICTO')) {
-        window.location.href = 'app.html';
-        return;
-    }
-    const token = localStorage.getItem('authToken');
+const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
+const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
 
-    // --- 2. STATE MANAGEMENT ---
-    // Keep track of the current state of the dashboard
+async function initializeTicketsPage() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            window.location.href = PORTAL_LOGIN_URL;
+            return;
+        }
+        const currentUser = await response.json();
+
+        // Page Protection: Only allow ICTO roles to access this page
+        if (!currentUser.role.includes('ICTO')) {
+            alert('Access Denied: This page is for ICTO staff only.');
+            window.location.href = 'app.html';
+            return;
+        }
+
+        // If authorized, set up the page and fetch initial data
+        setupEventListeners();
+        fetchAndRenderTickets();
+    } catch (error) {
+        console.error("Authentication check failed:", error);
+        window.location.href = PORTAL_LOGIN_URL;
+    }
+}
     let currentPage = 1;
     let totalPages = 1;
     let currentStatus = 'All';
     let currentSearch = '';
     let debounceTimer; // For search input to avoid excessive API calls
 
-    // --- 3. DOM ELEMENT REFERENCES ---
-    const tableBody = document.getElementById('tickets-table-body');
-    const searchInput = document.getElementById('search-input');
-    const statusFilter = document.getElementById('status-filter');
-    const prevButton = document.getElementById('prev-button');
-    const nextButton = document.getElementById('next-button');
-    const pageInfo = document.getElementById('page-info');
-
-    // --- 4. CORE FUNCTIONS ---
 
     /**
      * Fetches tickets from the server based on the current state
      * (page, status, search) and renders them.
      */
     async function fetchAndRenderTickets() {
+        const tableBody = document.getElementById('tickets-table-body');
         // Show a loading message while fetching
         tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading tickets...</td></tr>`;
 
         // Build the URL with query parameters
-        const url = new URL('https://lgu-helpdesk-copy.onrender.com/api/tickets');
+        const url = new URL(`${API_BASE_URL}/api/tickets`);
         url.searchParams.append('page', currentPage);
         url.searchParams.append('limit', 10); // Show 10 tickets per page
         if (currentStatus !== 'All') {
@@ -47,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include' // Use cookie for authentication
             });
             if (!response.ok) throw new Error((await response.json()).message);
             
@@ -65,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Array} tickets - An array of ticket objects.
      */
     function renderTable(tickets) {
+        const tableBody = document.getElementById('tickets-table-body');
         if (tickets.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No tickets found.</td></tr>`;
             return;
@@ -89,42 +101,59 @@ document.addEventListener('DOMContentLoaded', () => {
      * Updates the pagination controls (buttons and page info).
      */
     function renderPaginationControls() {
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const pageInfo = document.getElementById('page-info');
+
         pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
         prevButton.disabled = currentPage === 1;
         nextButton.disabled = currentPage >= totalPages;
     }
 
     // --- 5. EVENT LISTENERS ---
-    statusFilter.addEventListener('change', () => {
-        currentStatus = statusFilter.value;
-        currentPage = 1; // Reset to first page on new filter
-        fetchAndRenderTickets();
-    });
+function setupEventListeners() {
+    const searchInput = document.getElementById('search-input');
+    const statusFilter = document.getElementById('status-filter');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
 
-    searchInput.addEventListener('input', () => {
-        clearTimeout(debounceTimer);
-        // Debounce to avoid API calls on every keystroke
-        debounceTimer = setTimeout(() => {
-            currentSearch = searchInput.value;
-            currentPage = 1; // Reset to first page on new search
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => {
+            currentStatus = statusFilter.value;
+            currentPage = 1; // Reset to first page on new filter
             fetchAndRenderTickets();
-        }, 500); 
-    });
+        });
+    }
 
-    prevButton.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            fetchAndRenderTickets();
-        }
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            // Debounce to avoid API calls on every keystroke
+            debounceTimer = setTimeout(() => {
+                currentSearch = searchInput.value;
+                currentPage = 1; // Reset to first page on new search
+                fetchAndRenderTickets();
+            }, 500);
+        });
+    }
 
-    nextButton.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            fetchAndRenderTickets();
-        }
-    });
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchAndRenderTickets();
+            }
+        });
+    }
 
-    // --- 6. INITIAL LOAD ---
-    fetchAndRenderTickets();
-});
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                fetchAndRenderTickets();
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initializeTicketsPage);

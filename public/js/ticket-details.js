@@ -1,22 +1,40 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. SETUP & AUTH ---
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    // UPDATED: Redirect to index.html (the new auth page)
-    if (!currentUser) { window.location.href = 'index.html'; return; } 
-    const token = localStorage.getItem('authToken');
+const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
+const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
 
-    // --- 2. DOM ELEMENT REFERENCES ---
-    const container = document.getElementById('ticket-details-container');
+// --- Global State ---
+let currentUser = null;
+
+async function initializeTicketDetailsPage() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            window.location.href = PORTAL_LOGIN_URL;
+            return;
+        }
+        currentUser = await response.json();
+
+        // Now that we are authenticated, fetch the ticket details
+        fetchTicketDetails();
+
+    } catch (error) {
+        console.error("Authentication check failed:", error);
+        window.location.href = PORTAL_LOGIN_URL;
+    }
+}
+
+async function fetchTicketDetails() {
     const loadingMessage = document.getElementById('loading-message');
     const urlParams = new URLSearchParams(window.location.search);
     const ticketId = urlParams.get('id');
 
     if (!ticketId) { loadingMessage.textContent = 'Error: No ticket ID provided.'; return; }
 
-    // --- 3. CORE FUNCTIONS ---
-    async function fetchTicketDetails() {
         try {
-            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, { credentials: 'include' });
             if (!response.ok) throw new Error((await response.json()).message);
             const ticket = await response.json();
             loadingMessage.style.display = 'none';
@@ -24,9 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             loadingMessage.textContent = `Error: ${error.message}`;
         }
-    }
+}
 
     function renderTicketPage(ticket) {
+        const container = document.getElementById('ticket-details-container');
         const ticketHTML = `
             <div class="mx-auto max-w-4xl">
                 <!-- Header, Details, etc. -->
@@ -175,8 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}/comments`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
                 if (!response.ok) throw new Error((await response.json()).message);
                 
@@ -217,8 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}`, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ status: newStatus })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus }),
+                    credentials: 'include'
                 });
                 if (!response.ok) throw new Error((await response.json()).message);
                 const updatedTicket = await response.json();
@@ -248,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}/comments/${commentId}/attachment`, {
                         method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        credentials: 'include'
                     });
 
                     if (!response.ok) throw new Error((await response.json()).message);
@@ -263,5 +283,5 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    fetchTicketDetails();
-});
+
+document.addEventListener('DOMContentLoaded', initializeTicketDetailsPage);

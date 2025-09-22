@@ -1,29 +1,34 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. SETUP & AUTH ---
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    // Page protection: Only allow ICTO Head to see this page
-    if (!currentUser || currentUser.role !== 'ICTO Head') {
-        window.location.href = 'app.html';
-        return;
-    }
-    const token = localStorage.getItem('authToken');
+const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
+const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
 
-    // --- 2. DOM ELEMENT REFERENCES ---
-    const tableBody = document.getElementById('users-table-body');
-    // Edit Modal Elements
-    const editModal = document.getElementById('edit-user-modal');
-    const editForm = document.getElementById('edit-user-form');
-    const editUserName = document.getElementById('edit-user-name');
-    const editUserOffice = document.getElementById('edit-user-office'); // New
-    const editRoleSelect = document.getElementById('edit-role-select');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    const editMessage = document.getElementById('edit-message');
-    // Delete Modal Elements
-    const deleteModal = document.getElementById('delete-user-modal');
-    const deleteUserName = document.getElementById('delete-user-name');
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const deleteMessage = document.getElementById('delete-message');
+async function initializeUsersPage() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            window.location.href = PORTAL_LOGIN_URL;
+            return;
+        }
+        const currentUser = await response.json();
+
+        // Page protection: Only allow ICTO Head to see this page
+        if (currentUser.role !== 'ICTO Head') {
+            alert('Access Denied: This page is for administrators only.');
+            window.location.href = 'app.html';
+            return;
+        }
+
+        // If authorized, set up the page and fetch initial data
+        setupEventListeners();
+        fetchAndRenderUsers();
+    } catch (error) {
+        console.error("Authentication check failed:", error);
+        window.location.href = PORTAL_LOGIN_URL;
+    }
+}
 
     // A simple cache to hold the fetched user data to avoid re-fetching
     let usersCache = [];
@@ -32,11 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. CORE FUNCTIONS ---
     async function fetchAndRenderUsers() {
+        const tableBody = document.getElementById('users-table-body');
         // Show a loading state in the table
         tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading users...</td></tr>`;
         try {
-            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/users', {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const response = await fetch(`${API_BASE_URL}/api/users`, {
+                credentials: 'include' // Use cookie for authentication
             });
             if (!response.ok) throw new Error((await response.json()).message);
             usersCache = await response.json();
@@ -47,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTable(users) {
+        const tableBody = document.getElementById('users-table-body');
         if (users.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No users found.</td></tr>`;
             return;
@@ -77,6 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. MODAL & EVENT HANDLING ---
     function openEditModal(user) {
+        const editModal = document.getElementById('edit-user-modal');
+        const editUserName = document.getElementById('edit-user-name');
+        const editUserOffice = document.getElementById('edit-user-office');
+        const editRoleSelect = document.getElementById('edit-role-select');
+        const editMessage = document.getElementById('edit-message');
+
         selectedUserId = user._id;
         editUserName.textContent = user.name;
         editUserOffice.value = user.office; // New
@@ -86,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openDeleteModal(user) {
+        const deleteModal = document.getElementById('delete-user-modal');
+        const deleteUserName = document.getElementById('delete-user-name');
+        const deleteMessage = document.getElementById('delete-message');
         selectedUserId = user._id;
         deleteUserName.textContent = user.name;
         deleteMessage.textContent = '';
@@ -93,12 +109,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeModal() {
+        const editModal = document.getElementById('edit-user-modal');
+        const deleteModal = document.getElementById('delete-user-modal');
         editModal.classList.add('hidden');
         deleteModal.classList.add('hidden');
     }
 
+function setupEventListeners() {
+    const tableBody = document.getElementById('users-table-body');
+    // Edit Modal Elements
+    const editForm = document.getElementById('edit-user-form');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    // Delete Modal Elements
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
     // Event delegation for the entire table body
-    tableBody.addEventListener('click', (e) => {
+    if (tableBody) {
+        tableBody.addEventListener('click', (e) => {
         const action = e.target.dataset.action;
         const userId = e.target.dataset.userid;
         if (!action || !userId) return;
@@ -109,8 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (action === 'edit') openEditModal(user);
         if (action === 'delete') openDeleteModal(user);
     });
+    }
 
     // Handle the edit form submission
+    if (editForm) {
         editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -134,10 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/users/${selectedUserId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/${selectedUserId}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(updatedData)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedData),
+                credentials: 'include'
             });
             if (!response.ok) throw new Error((await response.json()).message);
             
@@ -155,15 +186,18 @@ document.addEventListener('DOMContentLoaded', () => {
             saveButton.innerHTML = originalButtonText;
         }
     });
+    }
 
     // Handle the delete confirmation
-    confirmDeleteBtn.addEventListener('click', async () => {
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', async () => {
+        const deleteMessage = document.getElementById('delete-message');
         deleteMessage.textContent = 'Deleting...';
         deleteMessage.className = 'mt-4 text-sm text-gray-600';
         try {
-            const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/users/${selectedUserId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/${selectedUserId}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             if (!response.ok) throw new Error((await response.json()).message);
             showToast('User deleted successfully.'); // Use toast for success
@@ -173,11 +207,11 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(`Error: ${error.message}`, 'error'); // Use toast for error
         }
     });
+    }
 
     // Handle cancel buttons
-    cancelEditBtn.addEventListener('click', closeModal);
-    cancelDeleteBtn.addEventListener('click', closeModal);
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeModal);
+    if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeModal);
+}
 
-    // --- 5. INITIAL LOAD ---
-    fetchAndRenderUsers();
-});
+document.addEventListener('DOMContentLoaded', initializeUsersPage);

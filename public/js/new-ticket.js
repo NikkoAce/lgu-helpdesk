@@ -1,17 +1,32 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Check for logged-in user first
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        window.location.href = 'index.html';
-        return;
+const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
+const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
+
+async function initializeNewTicketPage() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            // If not authenticated, redirect to the main portal login.
+            window.location.href = PORTAL_LOGIN_URL;
+            return;
+        }
+
+        // If authenticated, set up the form event listeners.
+        setupNewTicketForm();
+
+    } catch (error) {
+        console.error("Authentication check failed:", error);
+        window.location.href = PORTAL_LOGIN_URL;
     }
+}
 
-    const token = localStorage.getItem('authToken');
-
+function setupNewTicketForm() {
     const categorySelect = document.getElementById('category');
     const subCategorySelect = document.getElementById('sub-category');
     const ticketForm = document.getElementById('new-ticket-form');
-    const formMessage = document.getElementById('form-message');
     const submitButton = document.getElementById('submit-button');
 
     const subCategories = {
@@ -61,8 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/tickets', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(ticketData)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ticketData),
+                credentials: 'include' // Use cookie for authentication
             });
             if (!response.ok) throw new Error((await response.json()).message);
             
@@ -81,4 +97,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-

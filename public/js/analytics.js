@@ -1,42 +1,59 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. SETUP & AUTH ---
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    // Page protection: Only allow ICTO Head to see this page
-    if (!currentUser || currentUser.role !== 'ICTO Head') {
-        // Redirect non-admins to the main dashboard
-        window.location.href = 'app.html';
-        // It's good practice to add an alert for better user experience
-        alert('Access Denied: This page is for administrators only.');
-        return;
-    }
-    const token = localStorage.getItem('authToken');
+const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
+const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
 
-    // --- 2. DOM ELEMENT REFERENCES ---
-    const statsContainer = document.getElementById('stats-cards-container');
-    const chartCanvas = document.getElementById('status-chart');
+async function initializeAnalyticsPage() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            method: 'GET',
+            credentials: 'include',
+        });
 
-    // --- 3. CORE FUNCTIONS ---
-    async function fetchAndRenderAnalytics() {
-        try {
-            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/analytics/summary', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error((await response.json()).message);
-            
-            const summary = await response.json();
-            renderStatCards(summary);
-            renderStatusChart(summary);
-
-        } catch (error) {
-            statsContainer.innerHTML = `<div class="col-span-full text-center p-4 bg-red-100 text-red-700 rounded-lg">Error: ${error.message}</div>`;
+        if (!response.ok) {
+            window.location.href = PORTAL_LOGIN_URL;
+            return;
         }
+
+        const currentUser = await response.json();
+
+        // Page protection: Only allow ICTO Head to see this page
+        if (currentUser.role !== 'ICTO Head') {
+            alert('Access Denied: This page is for administrators only.');
+            window.location.href = 'app.html';
+            return;
+        }
+
+        // If authorized, fetch the analytics data
+        fetchAndRenderAnalytics();
+
+    } catch (error) {
+        console.error("Authentication failed:", error);
+        window.location.href = PORTAL_LOGIN_URL;
     }
+}
+
+async function fetchAndRenderAnalytics() {
+    const statsContainer = document.getElementById('stats-cards-container');
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/analytics/summary`, {
+            credentials: 'include' // Use cookie for authentication
+        });
+        if (!response.ok) throw new Error((await response.json()).message);
+        
+        const summary = await response.json();
+        renderStatCards(summary);
+        renderStatusChart(summary);
+
+    } catch (error) {
+        statsContainer.innerHTML = `<div class="col-span-full text-center p-4 bg-red-100 text-red-700 rounded-lg">Error: ${error.message}</div>`;
+    }
+}
 
     /**
      * Renders the summary data into stat cards.
      * @param {object} summary - The analytics data from the server.
      */
     function renderStatCards(summary) {
+        const statsContainer = document.getElementById('stats-cards-container');
         statsContainer.innerHTML = `
             <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
                 <dt class="truncate text-sm font-medium text-gray-500">Total Tickets</dt>
@@ -66,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {object} summary - The analytics data from the server.
      */
     function renderStatusChart(summary) {
+        const chartCanvas = document.getElementById('status-chart');
         const ctx = chartCanvas.getContext('2d');
         new Chart(ctx, {
             type: 'doughnut',
@@ -101,6 +119,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 4. INITIAL LOAD ---
-    fetchAndRenderAnalytics();
-});
+document.addEventListener('DOMContentLoaded', initializeAnalyticsPage);
