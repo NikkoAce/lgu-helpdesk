@@ -208,7 +208,7 @@ exports.ssoRedirectGso = (req, res) => {
         const userPayload = req.user;
 
         // Create a new, short-lived token specifically for the SSO jump (e.g., 30 seconds).
-        const ssoToken = jwt.sign({ user: userPayload }, JWT_SECRET, { expiresIn: '30s' });
+        const ssoToken = jwt.sign({ user: userPayload }, JWT_SECRET, { expiresIn: '2m' }); // Increased to 2 minutes for robustness
 
         // Determine the target GSO environment (prod or dev) from the query parameter.
         const targetEnv = req.query.env || 'prod';
