@@ -82,19 +82,27 @@ exports.forgotPassword = async (req, res) => {
         const resetUrl = `https://lgu-employee-portal.netlify.app/reset-password.html?token=${resetToken}`;
 
         // 5. Send the email
-        const message = `You are receiving this email because you (or someone else) has requested to reset the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
+        const textContent = `You are receiving this email because you (or someone else) has requested to reset the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
+        const htmlContent = `
+            <p>Hello,</p>
+            <p>You are receiving this email because you (or someone else) has requested to reset the password for your account.</p>
+            <p>Please click on the link below to complete the process:</p>
+            <p><a href="${resetUrl}" style="font-family: sans-serif; font-size: 14px; font-weight: bold; text-decoration: none; color: #ffffff; background-color: #0ea5e9; border: 15px solid #0ea5e9; border-radius: 3px; display: inline-block;">Reset Your Password</a></p>
+            <p>This link will expire in 15 minutes.</p>
+            <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+            <br>
+            <p>Thank you,<br>The LGU Employee Portal Team</p>
+        `;
 
         try {
             // Configure API key authorization: apiKey
             const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
             const apiKey = apiInstance.authentications['apiKey'];
             apiKey.apiKey = process.env.BREVO_API_KEY;
-
             const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-
             sendSmtpEmail.subject = 'Password Reset Request';
-            // Use textContent for plain text emails
-            sendSmtpEmail.textContent = message;
+            sendSmtpEmail.htmlContent = htmlContent;
+            sendSmtpEmail.textContent = textContent; // Provide a plain text fallback
             sendSmtpEmail.sender = { name: 'LGU Employee Portal', email: process.env.BREVO_FROM_EMAIL };
             sendSmtpEmail.to = [{ email: user.email }];
 
@@ -146,6 +154,12 @@ exports.resetPassword = async (req, res) => {
 
         // 3. Set the new password
         const { password } = req.body;
+
+        // Add validation to ensure a new password is provided and meets minimum length
+        if (!password || password.length < 6) {
+            return res.status(400).json({ message: 'Password is required and must be at least 6 characters long.' });
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
