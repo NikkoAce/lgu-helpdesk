@@ -65,15 +65,18 @@ exports.forgotPassword = async (req, res) => {
         const resetToken = crypto.randomBytes(20).toString('hex');
 
         // 2. Hash the token and set it on the user model
-        user.passwordResetToken = crypto
+        const passwordResetToken = crypto
             .createHash('sha256')
             .update(resetToken)
             .digest('hex');
 
         // 3. Set an expiry time (e.g., 15 minutes)
-        user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+        const passwordResetExpires = Date.now() + 15 * 60 * 1000;
 
-        await user.save();
+        // Use updateOne to avoid validation issues on existing documents
+        await User.updateOne({ _id: user._id }, {
+            $set: { passwordResetToken, passwordResetExpires }
+        });
 
         // 4. Create the reset URL for the frontend portal
         const resetUrl = `https://lgu-employee-portal.netlify.app/reset-password.html?token=${resetToken}`;
@@ -111,9 +114,10 @@ exports.forgotPassword = async (req, res) => {
 
         } catch (err) {
             console.error('Email sending error:', err);
-            user.passwordResetToken = undefined;
-            user.passwordResetExpires = undefined;
-            await user.save();
+            // Clear the token on failure
+            await User.updateOne({ _id: user._id }, {
+                $set: { passwordResetToken: undefined, passwordResetExpires: undefined }
+            });
             return res.status(500).json({ message: 'Error sending email. Please try again later.' });
         }
 
@@ -144,10 +148,12 @@ exports.resetPassword = async (req, res) => {
         // 3. Set the new password
         const { password } = req.body;
         const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
-        user.passwordResetToken = undefined;
-        user.passwordResetExpires = undefined;
-        await user.save();
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Update the user's password and clear the reset token fields
+        await User.updateOne({ _id: user._id }, {
+            $set: { password: hashedPassword, passwordResetToken: undefined, passwordResetExpires: undefined }
+        });
 
         res.status(200).json({ message: 'Password has been reset successfully.' });
 
