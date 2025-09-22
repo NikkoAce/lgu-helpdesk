@@ -82,6 +82,14 @@ exports.forgotPassword = async (req, res) => {
         const message = `You are receiving this email because you (or someone else) has requested to reset the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
 
         try {
+            // --- DEBUGGING: Log email configuration ---
+            console.log('--- Attempting to send email with Nodemailer ---');
+            console.log('Email Host:', process.env.EMAIL_HOST);
+            console.log('Email Port:', process.env.EMAIL_PORT);
+            console.log('Email User:', process.env.EMAIL_USERNAME);
+            // For security, we only check if the password is set, we don't log it.
+            console.log('Email Password is set:', !!process.env.EMAIL_PASSWORD);
+
             const transporter = nodemailer.createTransport({
                 host: process.env.EMAIL_HOST,
                 port: process.env.EMAIL_PORT,
