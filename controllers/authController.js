@@ -88,7 +88,7 @@ exports.forgotPassword = async (req, res) => {
         });
 
         // 4. Create the reset URL for the frontend portal
-        const resetUrl = `https://lgu-employee-portal.netlify.app/reset-password.html?token=${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
 
         // 5. Send the email
         const textContent = `You are receiving this email because you (or someone else) has requested to reset the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
@@ -193,4 +193,11 @@ exports.logoutUser = (req, res) => {
     });
 
     res.status(200).json({ message: 'Logout successful' });
+};
+
+exports.getCurrentUser = (req, res) => {
+    // The authMiddleware has already verified the token and attached the user payload.
+    // We can safely send this data back to the client.
+    // The payload contains non-sensitive information as defined during login.
+    res.status(200).json(req.user);
 };
