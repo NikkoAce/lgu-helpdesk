@@ -183,6 +183,10 @@ exports.resetPassword = async (req, res) => {
         // --- DEBUGGING: Log the result of the update operation ---
         console.log('Password update result:', updateResult);
 
+        // --- NEW DEBUGGING: Re-fetch user and log the new hash to confirm the write ---
+        const updatedUser = await User.findById(user._id).select('password');
+        console.log('Hash in DB immediately after update:', updatedUser.password);
+
         res.status(200).json({ message: 'Password has been reset successfully.' });
 
     } catch (error) {
