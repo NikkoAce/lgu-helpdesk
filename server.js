@@ -31,6 +31,12 @@ const corsOptions = {
 app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
 
+// --- NEW: Request Logger Middleware ---
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    next();
+});
+
 // --- DATABASE CONNECTION ---
 mongoose.connect(MONGO_URI)
     .then(() => console.log('MongoDB Connected'))

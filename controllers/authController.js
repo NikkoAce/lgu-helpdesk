@@ -118,7 +118,8 @@ exports.forgotPassword = async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Forgot Password Error:', error);
+        res.status(500).json({ message: 'Server error. Please check the logs for details.' });
     }
 };
 
@@ -151,6 +152,7 @@ exports.resetPassword = async (req, res) => {
         res.status(200).json({ message: 'Password has been reset successfully.' });
 
     } catch (error) {
-        res.status(500).json({ message: 'Error resetting password', error: error.message });
+        console.error('Reset Password Error:', error);
+        res.status(500).json({ message: 'Error resetting password. Please check the logs for details.' });
     }
 };
