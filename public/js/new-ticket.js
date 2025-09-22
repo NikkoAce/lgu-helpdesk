@@ -96,4 +96,4 @@ function setupNewTicketForm() {
             submitButton.innerHTML = originalButtonText;
         }
     });
-});
+};
