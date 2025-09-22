@@ -12,9 +12,10 @@ const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 // Define allowed origins
 const allowedOrigins = [
-    'https://lgu-employee-portal.netlify.app',
-    'https://lgu-ithelpdesk.netlify.app',
-    'http://127.0.0.1:5501'
+    'https://lgu-employee-portal.netlify.app', // Your main portal
+    'https://lgu-ithelpdesk.netlify.app',      // Your IT Helpdesk app (THIS IS THE MISSING ONE)
+    'http://127.0.0.1:5500',                   // Your local development URL for the portal
+    'http://127.0.0.1:5501'                    // A potential local dev URL for the helpdesk
 ];
 
 const corsOptions = {
