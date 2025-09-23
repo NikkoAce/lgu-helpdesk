@@ -134,7 +134,7 @@ exports.getGsoOffices = async (req, res) => {
         }
 
         // Make an authenticated request to the GSO system using the shared internal API key.
-        const response = await fetch(`${gsoApiUrl}/api/offices`, { // Assuming the GSO route is /api/offices and is secured by the key
+        const response = await fetch(`${gsoApiUrl}/api/offices/public`, { // The GSO system exposes offices at this path.
             headers: {
                 'X-Internal-API-Key': internalApiKey
             }
