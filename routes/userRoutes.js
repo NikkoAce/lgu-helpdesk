@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, updateUser, deleteUser, getMe, updateUserProfile } = require('../controllers/userController');
+const { getAllUsers, updateUser, deleteUser, getMe, updateUserProfile, getGsoOffices } = require('../controllers/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // This new route will allow other systems to verify a user's token.
 // It's placed before other routes with parameters to avoid conflicts.
 router.get('/me', authMiddleware, getMe);
+
+// This route acts as a public proxy to fetch offices from the GSO system.
+// It's used by both the registration and profile pages.
+router.get('/offices', getGsoOffices);
 
 // @route   PUT /api/users/me
 // @desc    Update current user's profile information

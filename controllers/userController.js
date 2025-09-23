@@ -116,3 +116,25 @@ exports.updateUserProfile = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while updating the profile.' });
     }
 };
+
+/**
+ * @desc    Acts as a proxy to fetch the list of offices from the GSO system.
+ * @route   GET /api/users/offices
+ * @access  Public
+ */
+exports.getGsoOffices = async (req, res) => {
+    try {
+        const gsoApiUrl = process.env.GSO_API_URL || 'https://lgu-gso-system.onrender.com';
+        // We assume the /api/offices endpoint on the GSO system is public.
+        const response = await fetch(`${gsoApiUrl}/api/offices`);
+
+        if (!response.ok) {
+            throw new Error(`GSO API responded with status: ${response.status}`);
+        }
+        const offices = await response.json();
+        res.status(200).json(offices);
+    } catch (error) {
+        console.error('Error proxying request to GSO for offices:', error);
+        res.status(502).json({ message: 'Could not retrieve office list from the GSO system.' });
+    }
+};
