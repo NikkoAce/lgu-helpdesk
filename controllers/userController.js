@@ -124,7 +124,8 @@ exports.updateUserProfile = async (req, res) => {
  */
 exports.getGsoOffices = async (req, res) => {
     try {
-        const gsoApiUrl = process.env.GSO_API_URL || 'https://lgu-gso-system.onrender.com';
+        // Use the correct GSO backend URL, with a fallback to the most recent known URL.
+        const gsoApiUrl = process.env.GSO_API_URL || 'https://gso-backend-mns8.onrender.com';
         const internalApiKey = process.env.INTERNAL_API_KEY;
 
         if (!internalApiKey) {
@@ -133,7 +134,7 @@ exports.getGsoOffices = async (req, res) => {
         }
 
         // Make an authenticated request to the GSO system using the shared internal API key.
-        const response = await fetch(`${gsoApiUrl}/api/offices`, {
+        const response = await fetch(`${gsoApiUrl}/api/offices`, { // Assuming the GSO route is /api/offices and is secured by the key
             headers: {
                 'X-Internal-API-Key': internalApiKey
             }
