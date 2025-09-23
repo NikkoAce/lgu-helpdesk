@@ -76,3 +76,43 @@ exports.getMe = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+/**
+ * @desc    Update current user's profile
+ * @route   PUT /api/users/me
+ * @access  Private
+ */
+exports.updateUserProfile = async (req, res) => {
+    try {
+        const { name, email, office } = req.body;
+        const userId = req.user.id; // From authMiddleware
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // If email is being changed, check if the new email is already taken by another user.
+        if (email && email.toLowerCase() !== user.email) {
+            const existingUser = await User.findOne({ email: email.toLowerCase() });
+            if (existingUser) {
+                return res.status(400).json({ message: 'This email address is already in use.' });
+            }
+            user.email = email.toLowerCase();
+        }
+
+        // Update other fields if they are provided in the request
+        if (name) user.name = name;
+        if (office) user.office = office;
+
+        const updatedUser = await user.save();
+
+        // Return a clean, updated user object (without sensitive data)
+        res.status(200).json(updatedUser.toObject({ virtuals: true, versionKey: false, transform: (doc, ret) => { delete ret.password; return ret; } }));
+
+    } catch (error) {
+        console.error('Update Profile Error:', error);
+        res.status(500).json({ message: 'An error occurred while updating the profile.' });
+    }
+};
