@@ -230,3 +230,28 @@ exports.ssoRedirectGso = (req, res) => {
         res.status(500).send('An error occurred during the single sign-on process.');
     }
 };
+
+/**
+ * @desc    Handles the callback after Google has authenticated the user
+ * @route   GET /api/auth/google/callback
+ * @access  Public (via redirect)
+ */
+exports.googleCallback = (req, res) => {
+    // Passport attaches the authenticated user to req.user.
+    // This user is the one we found or created in our passport.js config.
+    const user = req.user;
+
+    const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+    // Set the same HttpOnly cookie as our standard login
+    res.cookie('portalAuthToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None',
+        maxAge: 60 * 60 * 1000 // 1 hour
+    });
+
+    // Redirect the user back to the frontend dashboard.
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard.html`);
+};

@@ -3,8 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const morgan = require('morgan'); // Import morgan for logging
-
+const morgan = require('morgan');
+const passport = require('passport'); // Import passport
+const session = require('express-session'); // Import express-session
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +36,20 @@ const corsOptions = {
 app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
 app.use(cookieParser()); // To parse cookies from incoming requests
+
+// --- PASSPORT & SESSION MIDDLEWARE ---
+// This must come before your routes. Session is required by Passport for the OAuth flow.
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || 'a_very_secret_key_for_oauth', // Add SESSION_SECRET to your .env
+        resave: false,
+        saveUninitialized: false,
+        cookie: { secure: process.env.NODE_ENV === 'production' }
+    })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+require('./config/passport'); // Initialize passport configuration from its new location
 
 // --- Use morgan for detailed request logging ---
 app.use(morgan('dev'));
