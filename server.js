@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const passport = require('passport'); // Import passport
 const session = require('express-session'); // Import express-session
+const MongoStore = require('connect-mongo'); // Import connect-mongo
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,7 +45,13 @@ app.use(
         secret: process.env.SESSION_SECRET || 'a_very_secret_key_for_oauth', // Add SESSION_SECRET to your .env
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: process.env.NODE_ENV === 'production' }
+        // Use MongoStore to store sessions in your database, making them persistent
+        store: MongoStore.create({ mongoUrl: MONGO_URI }),
+        cookie: { 
+            secure: process.env.NODE_ENV === 'production',
+            // Set a reasonable lifetime for the session cookie (e.g., 15 minutes)
+            maxAge: 1000 * 60 * 15 
+        }
     })
 );
 app.use(passport.initialize());
