@@ -125,8 +125,19 @@ exports.updateUserProfile = async (req, res) => {
 exports.getGsoOffices = async (req, res) => {
     try {
         const gsoApiUrl = process.env.GSO_API_URL || 'https://lgu-gso-system.onrender.com';
-        // We assume the /api/offices endpoint on the GSO system is public.
-        const response = await fetch(`${gsoApiUrl}/api/offices`);
+        const internalApiKey = process.env.INTERNAL_API_KEY;
+
+        if (!internalApiKey) {
+            console.error('FATAL: INTERNAL_API_KEY is not defined in the environment variables.');
+            return res.status(500).json({ message: 'Server configuration error.' });
+        }
+
+        // Make an authenticated request to the GSO system using the shared internal API key.
+        const response = await fetch(`${gsoApiUrl}/api/offices`, {
+            headers: {
+                'X-Internal-API-Key': internalApiKey
+            }
+        });
 
         if (!response.ok) {
             throw new Error(`GSO API responded with status: ${response.status}`);
