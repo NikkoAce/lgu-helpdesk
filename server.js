@@ -34,6 +34,10 @@ const corsOptions = {
     credentials: true // IMPORTANT: Allow cookies to be sent from the frontend
 };
 
+// Trust the first proxy hop (essential for Render deployment)
+// This allows Passport to correctly determine the `https` protocol from proxy headers.
+app.set('trust proxy', 1);
+
 app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
 app.use(cookieParser()); // To parse cookies from incoming requests
