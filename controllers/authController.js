@@ -35,7 +35,12 @@ exports.loginUser = async (req, res) => {
         if (!employeeId || !password) return res.status(400).json({ message: 'Employee ID and password are required.' });
         
         const user = await User.findOne({ employeeId });
-        if (!user) return res.status(401).json({ message: 'Invalid credentials.' });
+        // If the user doesn't exist OR if they exist but don't have a password
+        // (i.e., they are a Google-only user), treat it as invalid credentials.
+        // This prevents the server from crashing on bcrypt.compare.
+        if (!user || !user.password) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials.' });
