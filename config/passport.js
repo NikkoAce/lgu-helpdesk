@@ -13,24 +13,33 @@ passport.use(
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
-                // Find a user in your database based on their Google email.
-                let user = await User.findOne({ email: profile.emails[0].value });
+                // 1. Find an existing user by their Google ID. This is the fastest path for returning users.
+                let user = await User.findOne({ googleId: profile.id });
 
                 if (user) {
-                    // If the user exists, pass them to the next step.
+                    // User already exists and is linked. Log them in.
+                    return done(null, user);
+                }
+
+                // 2. If no user is found by Google ID, try to find one by email to link the account.
+                user = await User.findOne({ email: profile.emails[0].value });
+
+                if (user) {
+                    // User exists but hasn't used Google to log in before.
+                    // Link their account by adding their Google ID and save.
+                    user.googleId = profile.id;
+                    await user.save();
                     return done(null, user);
                 } else {
-                    // If the user does not exist, create a new one.
-                    // IMPORTANT: You will need to add `googleId: String` to your User model
-                    // and make `employeeId` and `password` optional.
+                    // 3. If no user exists with this Google ID or email, create a new user.
                     const newUser = await User.create({
                         googleId: profile.id,
                         name: profile.displayName,
                         email: profile.emails[0].value,
-                        // Set default values for other required fields
-                        employmentType: 'Permanent', // Or a suitable default
+                        // Set default values. These can be updated later in their profile.
+                        employmentType: 'Permanent',
                         role: 'Employee',
-                        office: 'Unassigned' // Or a suitable default
+                        office: 'Unassigned'
                     });
                     return done(null, newUser);
                 }
