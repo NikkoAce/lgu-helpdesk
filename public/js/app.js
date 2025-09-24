@@ -116,21 +116,21 @@ async function renderDashboardAnalytics() {
         const summary = await response.json();
 
         statsContainer.innerHTML = `
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">Your Total Tickets</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">${summary.total}</dd>
+            <div class="stat">
+                <div class="stat-title">Your Total Tickets</div>
+                <div class="stat-value">${summary.total}</div>
             </div>
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">New</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-blue-600">${summary.new}</dd>
+            <div class="stat">
+                <div class="stat-title">New</div>
+                <div class="stat-value text-info">${summary.new}</div>
             </div>
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">In Progress</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">${summary.inProgress}</dd>
+            <div class="stat">
+                <div class="stat-title">In Progress</div>
+                <div class="stat-value text-warning">${summary.inProgress}</div>
             </div>
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">Resolved</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-green-600">${summary.resolved}</dd>
+            <div class="stat">
+                <div class="stat-title">Resolved</div>
+                <div class="stat-value text-success">${summary.resolved}</div>
             </div>
         `;
     } catch (error) {
@@ -170,21 +170,23 @@ async function renderTickets() {
         }
 
         const ticketsHTML = tickets.map(ticket => {
-            let badgeColor = 'bg-blue-100 text-blue-800';
-            if (ticket.status === 'In Progress') badgeColor = 'bg-yellow-100 text-yellow-800';
-            if (ticket.status === 'Resolved') badgeColor = 'bg-green-100 text-green-800';
-            if (ticket.status === 'Closed') badgeColor = 'bg-gray-100 text-gray-800';
+            let badgeClass = 'badge-info';
+            if (ticket.status === 'In Progress') badgeClass = 'badge-warning';
+            if (ticket.status === 'Resolved') badgeClass = 'badge-success';
+            if (ticket.status === 'Closed') badgeClass = 'badge-ghost';
 
             return `
-                <div class="mb-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <div class="flex flex-wrap items-center justify-between">
-                        <div class="flex-grow pr-4">
-                            <h3 class="text-lg font-semibold text-gray-800">${ticket.subject}</h3>
-                            <p class="text-sm text-gray-500">Ticket #${ticket.id} &bull; Submitted by: ${ticket.requesterName} on ${new Date(ticket.createdAt).toLocaleDateString()}</p>
-                        </div>
-                        <div class="flex items-center space-x-4 mt-2 sm:mt-0">
-                            <span class="text-sm font-medium px-2.5 py-0.5 rounded-full ${badgeColor}">${ticket.status}</span>
-                            <a href="ticket-details.html?id=${ticket.id}" class="text-sm font-medium text-sky-600 hover:underline">View Details</a>
+                <div class="card card-compact bg-base-100 border mb-4 hover:shadow-md transition-shadow duration-200">
+                    <div class="card-body">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex-grow pr-4">
+                                <h3 class="card-title text-base">${ticket.subject}</h3>
+                                <p class="text-xs text-base-content/60">#${ticket.id} &bull; ${ticket.requesterName} &bull; ${new Date(ticket.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <div class="card-actions items-center">
+                                <span class="badge ${badgeClass} badge-sm">${ticket.status}</span>
+                                <a href="ticket-details.html?id=${ticket.id}" class="btn btn-ghost btn-xs">View Details</a>
+                            </div>
                         </div>
                     </div>
                 </div>`;
@@ -274,10 +276,12 @@ function renderDashboardPagination() {
     const pageInfo = document.getElementById('dashboard-page-info');
     const prevButton = document.getElementById('dashboard-prev-button');
     const nextButton = document.getElementById('dashboard-next-button');
+    const pageNumber = document.getElementById('dashboard-page-number');
 
-    if (!pageInfo || !prevButton || !nextButton) return;
+    if (!pageInfo || !prevButton || !nextButton || !pageNumber) return;
 
     pageInfo.textContent = `Page ${dashboardCurrentPage} of ${dashboardTotalPages}`;
+    pageNumber.textContent = dashboardCurrentPage;
     prevButton.disabled = dashboardCurrentPage === 1;
     nextButton.disabled = dashboardCurrentPage >= dashboardTotalPages;
 }
