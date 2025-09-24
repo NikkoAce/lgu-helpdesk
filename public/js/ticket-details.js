@@ -51,64 +51,71 @@ async function fetchTicketDetails() {
                 <!-- Header, Details, etc. -->
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm text-gray-500">Ticket #${ticket.id}</p>
+                        <p class="text-sm text-base-content/70">Ticket #${ticket.id}</p>
                         <h1 class="text-3xl font-bold text-gray-800">${ticket.subject}</h1>
                     </div>
                     <div class="mt-1">
-                        <span id="status-badge" class="text-lg font-medium px-4 py-1.5 rounded-full ${getBadgeColor(ticket.status)}">${ticket.status}</span>
+                        <span id="status-badge" class="badge badge-lg ${getBadgeColor(ticket.status)}">${ticket.status}</span>
                     </div>
                 </div>
                 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="md:col-span-1 space-y-6">
-                        <div class="rounded-lg border bg-white p-4 shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-4">Details</h2>
+                        <div class="card card-compact bg-base-100 border">
+                            <div class="card-body">
+                            <h2 class="card-title">Details</h2>
                             <div class="space-y-3 text-sm">
-                                <div class="flex justify-between"><span class="font-medium text-gray-500">Requester:</span><span class="text-gray-800 text-right">${ticket.requesterName}</span></div>
-                                <div class="flex justify-between"><span class="font-medium text-gray-500">Office:</span><span class="text-gray-800 text-right">${ticket.requesterOffice || 'N/A'}</span></div>
-                                <div class="flex justify-between"><span class="font-medium text-gray-500">Department:</span><span class="text-gray-800 text-right">${ticket.requesterRole}</span></div>
-                                <div class="flex justify-between"><span class="font-medium text-gray-500">Created:</span><span class="text-gray-800 text-right">${new Date(ticket.createdAt).toLocaleString()}</span></div>
+                                <div class="flex justify-between"><span class="font-medium text-base-content/70">Requester:</span><span class="text-base-content text-right">${ticket.requesterName}</span></div>
+                                <div class="flex justify-between"><span class="font-medium text-base-content/70">Office:</span><span class="text-base-content text-right">${ticket.requesterOffice || 'N/A'}</span></div>
+                                <div class="flex justify-between"><span class="font-medium text-base-content/70">Department:</span><span class="text-base-content text-right">${ticket.requesterRole}</span></div>
+                                <div class="flex justify-between"><span class="font-medium text-base-content/70">Created:</span><span class="text-base-content text-right">${new Date(ticket.createdAt).toLocaleString()}</span></div>
+                            </div>
                             </div>
                         </div>
                         <div id="admin-actions" class="hidden">
-                           <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Actions</h2>
+                           <div class="card card-compact bg-base-100 border">
+                            <div class="card-body">
+                                <h2 class="card-title">Actions</h2>
                                 <form id="update-status-form">
-                                    <label for="status-select" class="block text-sm font-medium text-gray-700">Update Status</label>
-                                    <select id="status-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">
+                                    <label for="status-select" class="label"><span class="label-text">Update Status</span></label>
+                                    <select id="status-select" class="select select-bordered w-full">
                                         <option value="New">New</option>
                                         <option value="In Progress">In Progress</option>
                                         <option value="Resolved">Resolved</option>
                                         <option value="Closed">Closed</option>
                                     </select>
-                                    <div id="update-message" class="text-sm mt-2"></div>
-                                    <button type="submit" class="mt-4 w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Update</button>
+                                    <button type="submit" class="btn btn-primary w-full mt-4">Update</button>
                                 </form>
+                            </div>
                             </div>
                         </div>
                     </div>
                     <div class="md:col-span-2">
-                        <div class="rounded-lg border bg-white p-6 shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800">Description</h2>
-                            <p class="mt-2 text-gray-700 whitespace-pre-wrap">${ticket.description}</p>
+                        <div class="card bg-base-100 border">
+                            <div class="card-body">
+                                <h2 class="card-title">Description</h2>
+                                <p class="mt-2 text-base-content whitespace-pre-wrap">${ticket.description}</p>
+                            </div>
                         </div>
                         <div class="mt-8">
                             <h2 class="text-xl font-semibold text-gray-800 mb-4">Conversation</h2>
                             <div id="comment-list" class="space-y-4"></div>
                             <form id="comment-form" class="mt-6">
-                               <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                                    <label for="comment-content" class="text-sm font-medium text-gray-700">Add a reply</label>
-                                    <textarea id="comment-content" name="content" rows="4" required class="mt-2 w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" placeholder="Type your message..."></textarea>
+                               <div class="card bg-base-100 border">
+                                <div class="card-body">
+                                    <label for="comment-content" class="label"><span class="label-text">Add a reply</span></label>
+                                    <textarea id="comment-content" name="content" rows="4" required class="textarea textarea-bordered" placeholder="Type your message..."></textarea>
                                     
                                     <!-- FIXED: Added the file input HTML here -->
                                     <div class="mt-3">
-                                        <label for="attachment" class="text-sm font-medium text-gray-700">Attach a file (optional)</label>
-                                        <input type="file" id="attachment" name="attachment" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"/>
+                                        <label for="attachment" class="label"><span class="label-text">Attach a file (optional)</span></label>
+                                        <input type="file" id="attachment" name="attachment" class="file-input file-input-bordered w-full" />
                                         <p id="file-preview" class="mt-2 text-sm text-gray-600"></p>
                                     </div>
 
-                                    <div class="mt-3 text-right">
-                                        <button type="submit" class="inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">Submit Reply</button>
+                                    <div class="card-actions justify-end mt-2">
+                                        <button type="submit" class="btn btn-primary">Submit Reply</button>
                                     </div>
+                                </div>
                                 </div>
                             </form>
                         </div>
@@ -124,10 +131,10 @@ async function fetchTicketDetails() {
     }
 
     function getBadgeColor(status) {
-        if (status === 'In Progress') return 'bg-yellow-100 text-yellow-800';
-        if (status === 'Resolved') return 'bg-green-100 text-green-800';
-        if (status === 'Closed') return 'bg-gray-100 text-gray-800';
-        return 'bg-blue-100 text-blue-800'; // Default for 'New'
+        if (status === 'In Progress') return 'badge-warning';
+        if (status === 'Resolved') return 'badge-success';
+        if (status === 'Closed') return 'badge-ghost';
+        return 'badge-info'; // Default for 'New'
     }
 
      function renderComments(comments) {
@@ -142,17 +149,18 @@ async function fetchTicketDetails() {
             const showDeleteButton = currentUser.role.includes('ICTO') && comment.attachmentUrl;
             
             return `
-            <div class="rounded-lg border bg-white p-4 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <p class="font-semibold text-gray-800">${comment.author}</p>
-                    <p class="text-xs text-gray-500">${new Date(comment.createdAt).toLocaleString()}</p>
-                </div>
-                <p class="mt-2 text-gray-700 whitespace-pre-wrap">${comment.content}</p>
-                ${comment.attachmentUrl ? `
-                <div class="mt-3 flex items-center space-x-4">
-                    <a href="${comment.attachmentUrl}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-sky-600 hover:underline">View Attachment</a>
-                    ${showDeleteButton ? `
-                    <button data-comment-id="${comment._id}" class="delete-attachment-btn text-sm font-medium text-red-600 hover:underline">Delete</button>
+            <div class="card card-compact bg-base-100 border">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <p class="font-semibold">${comment.author}</p>
+                        <p class="text-xs text-base-content/70">${new Date(comment.createdAt).toLocaleString()}</p>
+                    </div>
+                    <p class="mt-2 whitespace-pre-wrap">${comment.content}</p>
+                    ${comment.attachmentUrl ? `
+                    <div class="card-actions items-center">
+                        <a href="${comment.attachmentUrl}" target="_blank" rel="noopener noreferrer" class="link link-primary text-sm">View Attachment</a>
+                        ${showDeleteButton ? `<button data-comment-id="${comment._id}" class="btn btn-link btn-error btn-xs p-0">Delete</button>` : ''}
+                    </div>
                     ` : ''}
                 </div>
                 ` : ''}
@@ -189,7 +197,10 @@ async function fetchTicketDetails() {
             }
 
             submitButton.disabled = true;
-            submitButton.innerHTML = 'Submitting...';
+            submitButton.innerHTML = `
+                <span class="loading loading-spinner"></span>
+                Submitting...
+            `;
 
             try {
                 const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}/comments`, {
@@ -224,15 +235,20 @@ async function fetchTicketDetails() {
 
         const statusSelect = document.getElementById('status-select');
         const updateForm = document.getElementById('update-status-form');
-        const updateMessage = document.getElementById('update-message');
         
         statusSelect.value = ticket.status;
 
         updateForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const newStatus = statusSelect.value;
-            updateMessage.textContent = '';
-            updateMessage.className = 'text-sm mt-2';
+            const button = updateForm.querySelector('button[type="submit"]');
+            const originalButtonText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = `
+                <span class="loading loading-spinner"></span>
+                Updating...
+            `;
+
             try {
                 const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}`, {
                     method: 'PATCH',
@@ -244,10 +260,13 @@ async function fetchTicketDetails() {
                 const updatedTicket = await response.json();
                 const statusBadge = document.getElementById('status-badge');
                 statusBadge.textContent = updatedTicket.status;
-                statusBadge.className = `text-lg font-medium px-4 py-1.5 rounded-full ${getBadgeColor(updatedTicket.status)}`;
+                statusBadge.className = `badge badge-lg ${getBadgeColor(updatedTicket.status)}`;
                 showToast('Status updated successfully!'); 
             } catch (error) {
                 showToast(`Error: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalButtonText;
             }
         });
     }

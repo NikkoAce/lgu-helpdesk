@@ -51,46 +51,46 @@
                 <h1 class="text-3xl font-bold text-gray-800">All Support Tickets</h1>
 
                 <!-- NEW: Filter Controls -->
-                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div class="sm:col-span-2">
-                        <label for="search-input" class="sr-only">Search</label>
-                        <input type="search" id="search-input" placeholder="Search by subject..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">
-                    </div>
-                    <div>
-                        <label for="status-filter" class="sr-only">Filter by Status</label>
-                        <select id="status-filter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">
+                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <label class="input input-bordered flex items-center gap-2 md:col-span-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 opacity-70"><path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" /></svg>
+                        <input type="search" id="search-input" class="grow" placeholder="Search by subject, ID, or requester..." />
+                    </label>
+                    <select id="status-filter" class="select select-bordered w-full">
                             <option value="All">All Statuses</option>
                             <option value="New">New</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Resolved">Resolved</option>
                             <option value="Closed">Closed</option>
-                        </select>
-                    </div>
+                    </select>
                 </div>
                 
                 <!-- Tickets Table Container -->
-                <div class="mt-8 overflow-x-auto rounded-lg border bg-white shadow-md">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                <div class="mt-4 overflow-x-auto">
+                    <table class="table w-full">
+                        <thead>
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Subject</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Requester</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
-                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">View</span></th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="tickets-table-body" class="divide-y bg-white">
+                        <tbody id="tickets-table-body">
                             <!-- Rows will be inserted here -->
                         </tbody>
                     </table>
                 </div>
 
                 <!-- NEW: Pagination Controls -->
-                <div id="pagination-controls" class="mt-4 flex items-center justify-between">
-                    <button id="prev-button" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Previous</button>
+                <div class="mt-4 flex items-center justify-between">
                     <div id="page-info" class="text-sm text-gray-700"></div>
-                    <button id="next-button" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Next</button>
+                    <div class="join">
+                        <button id="prev-button" class="join-item btn btn-sm">«</button>
+                        <button class="join-item btn btn-sm">Page <span id="page-number">1</span></button>
+                        <button id="next-button" class="join-item btn btn-sm">»</button>
+                    </div>
                 </div>
             </main>
         </div>

@@ -56,24 +56,22 @@
     </div>
     
  
-
-
-    <!-- NEW: Modal for AI Assistant Response -->
-    <div id="ai-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
-        <div class="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl transform transition-all duration-300 scale-95">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-semibold text-gray-800">✨ AI Assistant</h3>
-                <button id="close-ai-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
-            </div>
-            <div id="ai-modal-content" class="mt-4 min-h-[150px] max-h-96 overflow-y-auto rounded-md border bg-gray-50 p-4 text-gray-700 whitespace-pre-wrap">
+    <!-- Modal for AI Assistant Response -->
+    <dialog id="ai-modal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <form method="dialog">
+                <button id="close-ai-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+            <h3 class="font-bold text-lg">✨ AI Assistant</h3>
+            <div id="ai-modal-content" class="mt-4 p-4 whitespace-pre-wrap bg-base-200 rounded-md min-h-[150px] max-h-96 overflow-y-auto">
                 <!-- AI generated content will appear here -->
             </div>
-            <div class="mt-4 flex justify-end space-x-3">
-                 <button id="copy-ai-content" class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Copy to Clipboard</button>
-                 <button id="insert-ai-content" class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">Insert as Reply</button>
+            <div class="modal-action mt-4">
+                 <button id="copy-ai-content" class="btn btn-primary">Copy to Clipboard</button>
+                 <button id="insert-ai-content" class="btn btn-accent">Insert as Reply</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- Toast Notification Container -->
 <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3 w-80">

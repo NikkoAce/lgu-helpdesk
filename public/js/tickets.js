@@ -39,8 +39,7 @@ async function initializeTicketsPage() {
      */
     async function fetchAndRenderTickets() {
         const tableBody = document.getElementById('tickets-table-body');
-        // Show a loading message while fetching
-        tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading tickets...</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4"><span class="loading loading-spinner"></span></td></tr>`;
 
         // Build the URL with query parameters
         const url = new URL(`${API_BASE_URL}/api/tickets`);
@@ -64,7 +63,7 @@ async function initializeTicketsPage() {
             renderTable(data.tickets);
             renderPaginationControls();
         } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-600">Error: ${error.message}</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-error">Error: ${error.message}</td></tr>`;
         }
     }
 
@@ -75,21 +74,21 @@ async function initializeTicketsPage() {
     function renderTable(tickets) {
         const tableBody = document.getElementById('tickets-table-body');
         if (tickets.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No tickets found.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4">No tickets found.</td></tr>`;
             return;
         }
         tableBody.innerHTML = tickets.map(ticket => {
-            let badgeColor = 'bg-blue-100 text-blue-800';
-            if (ticket.status === 'In Progress') badgeColor = 'bg-yellow-100 text-yellow-800';
-            if (ticket.status === 'Resolved') badgeColor = 'bg-green-100 text-green-800';
-            if (ticket.status === 'Closed') badgeColor = 'bg-gray-100 text-gray-800';
+            let badgeClass = 'badge-info';
+            if (ticket.status === 'In Progress') badgeClass = 'badge-warning';
+            if (ticket.status === 'Resolved') badgeClass = 'badge-success';
+            if (ticket.status === 'Closed') badgeClass = 'badge-ghost';
             return `
-                <tr class="hover:bg-gray-50">
+                <tr class="hover">
                     <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${ticket.subject}</div><div class="text-sm text-gray-500">${ticket.category}</div></td>
                     <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-gray-900">${ticket.requesterName}</div><div class="text-sm text-gray-500">${ticket.requesterRole}</div></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${badgeColor}">${ticket.status}</span></td>
+                    <td class="px-6 py-4 whitespace-nowrap"><span class="badge badge-sm ${badgeClass}">${ticket.status}</span></td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(ticket.createdAt).toLocaleDateString()}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"><a href="ticket-details.html?id=${ticket.id}" class="text-sky-600 hover:text-sky-900">View</a></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"><a href="ticket-details.html?id=${ticket.id}" class="btn btn-ghost btn-xs">View</a></td>
                 </tr>`;
         }).join('');
     }
@@ -101,8 +100,10 @@ async function initializeTicketsPage() {
         const prevButton = document.getElementById('prev-button');
         const nextButton = document.getElementById('next-button');
         const pageInfo = document.getElementById('page-info');
+        const pageNumber = document.getElementById('page-number');
 
         pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        pageNumber.textContent = currentPage;
         prevButton.disabled = currentPage === 1;
         nextButton.disabled = currentPage >= totalPages;
     }
