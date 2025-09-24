@@ -207,11 +207,20 @@ exports.getCurrentUser = (req, res) => {
     res.status(200).json(req.user);
 };
 
-exports.ssoRedirectGso = (req, res) => {
+exports.ssoRedirectGso = async (req, res) => {
     try {
         // The user is authenticated via the HttpOnly cookie (verified by authMiddleware).
-        const userPayload = req.user;
+        // The req.user payload might be stale, so we must fetch the latest user data.
+        const userId = req.user.id;
+        const latestUser = await User.findById(userId).select('id name role office email');
 
+        if (!latestUser) {
+            return res.status(404).send('User not found. Unable to proceed with single sign-on.');
+        }
+
+        // Use the fresh user data from the database to create the payload.
+        const userPayload = { id: latestUser.id, name: latestUser.name, role: latestUser.role, office: latestUser.office, email: latestUser.email };
+        
         // Create a new, short-lived token specifically for the SSO jump (e.g., 30 seconds).
         const ssoToken = jwt.sign({ user: userPayload }, JWT_SECRET, { expiresIn: '2m' }); // Increased to 2 minutes for robustness
 
