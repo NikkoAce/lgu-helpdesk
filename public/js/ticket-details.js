@@ -1,6 +1,3 @@
-// --- Global State ---
-let currentUser = null;
-
 async function initializeTicketDetailsPage() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/auth/me`, {

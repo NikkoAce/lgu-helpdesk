@@ -54,22 +54,56 @@
                     <p class="mt-2 text-gray-600">Please provide as much detail as possible so we can assist you effectively.</p>
 
                     <!-- New Ticket Form -->
-                    <form id="new-ticket-form" class="mt-8 space-y-6 rounded-lg bg-white p-8 shadow-md">
-                        
-                        <!-- Category & Sub-Category -->
-                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <div>
-                                <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                                <select id="category" name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">
-                                    <option value="">Select a Category...</option>
-                                    <option value="Hardware">Hardware</option>
-                                    <option value="Software">Software</option>
-                                    <option value="Network">Network / Internet</option>
-                                    <option value="Printer">Printer</option>
-                                    <option value="Account">System Account</option>
-                                    <option value="Information Request">Information Request</option>
-                                </select>
-                            </div>
+                    <div class="card mt-8 bg-base-100 shadow-xl border">
+                        <div class="card-body">
+                            <form id="new-ticket-form" class="space-y-4">
+                                <!-- Category & Sub-Category -->
+                                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    <div class="form-control w-full">
+                                        <label for="category" class="label"><span class="label-text">Category</span></label>
+                                        <select id="category" name="category" required class="select select-bordered">
+                                            <option value="" disabled selected>Select a Category</option>
+                                            <option value="Hardware">Hardware</option>
+                                            <option value="Software">Software</option>
+                                            <option value="Network">Network / Internet</option>
+                                            <option value="Printer">Printer</option>
+                                            <option value="Account">System Account</option>
+                                            <option value="Information Request">Information Request</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-control w-full">
+                                        <label for="sub-category" class="label"><span class="label-text">Sub-Category</span></label>
+                                        <select id="sub-category" name="sub-category" required disabled class="select select-bordered">
+                                            <option value="" disabled selected>First select a category</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Urgency -->
+                                <div class="form-control w-full">
+                                    <label for="urgency" class="label"><span class="label-text">Urgency Level</span></label>
+                                    <select id="urgency" name="urgency" required class="select select-bordered">
+                                        <option value="Low">Low - General inquiry</option>
+                                        <option value="Medium">Medium - Minor issue, work is possible</option>
+                                        <option value="High">High - Significant issue, work is impacted</option>
+                                        <option value="Critical">Critical - System down, work cannot continue</option>
+                                    </select>
+                                </div>
+                                <!-- Subject -->
+                                <div class="form-control w-full">
+                                    <label for="subject" class="label"><span class="label-text">Subject</span></label>
+                                    <input type="text" id="subject" name="subject" required class="input input-bordered" placeholder="e.g., Cannot connect to office Wi-Fi">
+                                </div>
+                                <!-- Description -->
+                                <div class="form-control w-full">
+                                    <label for="description" class="label"><span class="label-text">Detailed Description</span></label>
+                                    <textarea id="description" name="description" rows="5" required class="textarea textarea-bordered" placeholder="Please describe the issue, including any error messages and steps to reproduce the problem."></textarea>
+                                </div>
+                                <!-- Submit Button -->
+                                <div class="card-actions justify-end mt-4">
+                                    <button type="submit" id="submit-button" class="btn btn-primary">Submit Ticket</button>
+                                </div>
+                            </form>
+                        </div>
                             <div>
                                 <label for="sub-category" class="block text-sm font-medium text-gray-700">Sub-Category</label>
                                 <select id="sub-category" name="sub-category" required disabled class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500">
@@ -88,29 +122,7 @@
                                 <option value="Critical">Critical - System down, work cannot continue</option>
                             </select>
                         </div>
-
-                        <!-- Subject -->
-                        <div>
-                            <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                            <input type="text" id="subject" name="subject" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Cannot connect to office Wi-Fi">
-                        </div>
-
-                        <!-- Description -->
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700">Detailed Description</label>
-                            <textarea id="description" name="description" rows="5" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" placeholder="Please describe the issue, including any error messages and steps to reproduce the problem."></textarea>
-                        </div>
-                        
-                        <!-- Form Messages -->
-                        <div id="form-message" class="text-sm"></div>
-
-                        <!-- Submit Button -->
-                        <div class="text-right">
-                            <button type="submit" id="submit-button" class="inline-flex justify-center rounded-md border border-transparent bg-sky-600 px-6 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
-                                Submit Ticket
-                            </button>
-                        </div>
-                    </form>
+                            </div>
                 </div>
             </main>
         </div>

@@ -37,7 +37,6 @@ function setupNewTicketForm() {
     categorySelect.addEventListener('change', () => {
         const selectedCategory = categorySelect.value;
         subCategorySelect.innerHTML = '<option value="" disabled selected>Select a sub-category</option>';
-        subCategorySelect.disabled = true;
 
         if (selectedCategory && subCategories[selectedCategory]) {
             subCategorySelect.disabled = false;
@@ -83,3 +82,5 @@ function setupNewTicketForm() {
         }
     });
 };
+
+document.addEventListener('DOMContentLoaded', initializeNewTicketPage);
