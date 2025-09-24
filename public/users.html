@@ -52,8 +52,21 @@
                     <h1 class="text-3xl font-bold text-gray-800">User Management</h1>
                 </div>
                 
+                <!-- Search Bar -->
+                <div class="mt-6">
+                    <label for="search-input" class="sr-only">Search users</label>
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input type="text" id="search-input" class="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" placeholder="Search by name, ID, email, or office...">
+                    </div>
+                </div>
+
                 <!-- Users Table Container -->
-                <div class="mt-8 overflow-x-auto rounded-lg border bg-white shadow-md">
+                <div class="mt-4 overflow-x-auto rounded-lg border bg-white shadow-md">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>

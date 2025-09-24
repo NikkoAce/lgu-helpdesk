@@ -7,7 +7,22 @@ exports.getAllUsers = async (req, res) => {
     // ... (logic for fetching all users)
     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
     try {
-        const users = await User.find().select('-password').sort({ name: 1 });
+        const { search } = req.query;
+        let query = {};
+
+        if (search) {
+            const searchRegex = new RegExp(search, 'i'); // 'i' for case-insensitive
+            query = {
+                $or: [
+                    { name: searchRegex },
+                    { email: searchRegex },
+                    { office: searchRegex },
+                    { employeeId: searchRegex }
+                ]
+            };
+        }
+
+        const users = await User.find(query).select('-password').sort({ name: 1 });
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching users', error: error.message });

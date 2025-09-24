@@ -22,23 +22,28 @@ async function initializeUsersPage() {
         setupEventListeners();
         fetchAndRenderUsers();
     } catch (error) {
-        console.error("Authentication check failed:", error);
+        console.error("Initialization check failed:", error);
         window.location.href = PORTAL_LOGIN_URL;
     }
 }
 
     // A simple cache to hold the fetched user data to avoid re-fetching
     let usersCache = [];
-    // To keep track of which user is being edited or deleted
+    // To keep track of which user is being edited or deleted.
     let selectedUserId = null;
 
     // --- 3. CORE FUNCTIONS ---
-    async function fetchAndRenderUsers() {
+    async function fetchAndRenderUsers(searchTerm = '') {
         const tableBody = document.getElementById('users-table-body');
         // Show a loading state in the table
         tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading users...</td></tr>`;
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users`, {
+            const url = new URL(`${API_BASE_URL}/api/users`);
+            if (searchTerm) {
+                url.searchParams.append('search', searchTerm.trim());
+            }
+
+            const response = await fetch(url, {
                 credentials: 'include' // Use cookie for authentication
             });
             if (!response.ok) throw new Error((await response.json()).message);
@@ -88,7 +93,7 @@ async function initializeUsersPage() {
         const editMessage = document.getElementById('edit-message');
 
         selectedUserId = user._id;
-        editUserName.textContent = user.name;
+        editUserName.value = user.name; // FIX: Use .value for input fields
         editUserOffice.value = user.office; // New
         editRoleSelect.value = user.role;
         editMessage.textContent = '';
@@ -114,12 +119,28 @@ async function initializeUsersPage() {
 
 function setupEventListeners() {
     const tableBody = document.getElementById('users-table-body');
+    const searchInput = document.getElementById('search-input');
+
+    // --- Debounce for Search ---
+    let debounceTimer;
+    const debounce = (func, delay) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(func, delay);
+    };
+
     // Edit Modal Elements
     const editForm = document.getElementById('edit-user-form');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     // Delete Modal Elements
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+    // Search input listener
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            debounce(() => fetchAndRenderUsers(searchInput.value), 300);
+        });
+    }
 
     // Event delegation for the entire table body
     if (tableBody) {
