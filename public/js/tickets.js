@@ -1,18 +1,10 @@
 async function initializeTicketsPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            window.location.href = PORTAL_LOGIN_URL;
-            return;
-        }
-        const currentUser = await response.json();
+        // First, run the main app initialization to authenticate and render common UI
+        await initializeApp();
 
         // Page Protection: Only allow ICTO roles to access this page
-        if (!currentUser.role.includes('ICTO')) {
+        if (!currentUser || !currentUser.role.includes('ICTO')) {
             alert('Access Denied: This page is for ICTO staff only.');
             window.location.href = 'app.html';
             return;

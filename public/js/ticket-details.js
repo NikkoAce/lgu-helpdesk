@@ -1,15 +1,7 @@
 async function initializeTicketDetailsPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            window.location.href = PORTAL_LOGIN_URL;
-            return;
-        }
-        currentUser = await response.json();
+        // First, run the main app initialization to authenticate and render common UI
+        await initializeApp();
 
         // Now that we are authenticated, fetch the ticket details
         fetchTicketDetails();

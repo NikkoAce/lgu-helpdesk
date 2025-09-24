@@ -1,15 +1,7 @@
 async function initializeNewTicketPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            // If not authenticated, redirect to the main portal login.
-            window.location.href = PORTAL_LOGIN_URL;
-            return;
-        }
+        // First, run the main app initialization to authenticate and render common UI
+        await initializeApp();
 
         // If authenticated, set up the form event listeners.
         setupNewTicketForm();

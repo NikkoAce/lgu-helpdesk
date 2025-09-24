@@ -1,19 +1,10 @@
 async function initializeAnalyticsPage() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            window.location.href = PORTAL_LOGIN_URL;
-            return;
-        }
-
-        const currentUser = await response.json();
+        // First, run the main app initialization to authenticate and render common UI
+        await initializeApp();
 
         // Page protection: Only allow ICTO Head to see this page
-        if (currentUser.role !== 'ICTO Head') {
+        if (!currentUser || currentUser.role !== 'ICTO Head') {
             alert('Access Denied: This page is for administrators only.');
             window.location.href = 'app.html';
             return;
