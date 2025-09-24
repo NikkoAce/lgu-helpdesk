@@ -56,6 +56,9 @@ function setupNewTicketForm() {
             <span class="loading loading-spinner"></span> Submitting...
         `;
 
+        const formData = new FormData(ticketForm);
+        const ticketData = Object.fromEntries(formData.entries());
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/tickets`, {
                 method: 'POST',
