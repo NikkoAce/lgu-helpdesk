@@ -41,12 +41,7 @@ function setupNewTicketForm() {
 
         if (selectedCategory && subCategories[selectedCategory]) {
             subCategorySelect.disabled = false;
-            subCategories[selectedCategory].forEach(sub => {
-                const option = document.createElement('option');
-                option.value = sub;
-                option.textContent = sub;
-                subCategorySelect.appendChild(option);
-            });
+            subCategorySelect.innerHTML += subCategories[selectedCategory].map(sub => `<option value="${sub}">${sub}</option>`).join('');
         }
     });
 
@@ -58,12 +53,8 @@ function setupNewTicketForm() {
         // --- Set Loading State ---
         submitButton.disabled = true;
         submitButton.innerHTML = `
-            <span class="loading loading-spinner"></span>
-            Submitting...
+            <span class="loading loading-spinner"></span> Submitting...
         `;
-        
-        const formData = new FormData(ticketForm);
-        const ticketData = Object.fromEntries(formData.entries());
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/tickets`, {
