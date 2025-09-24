@@ -13,6 +13,7 @@ async function initializeTicketDetailsPage() {
 
         // Now that we are authenticated, fetch the ticket details
         fetchTicketDetails();
+        setupEventListeners(); // Add this line
 
     } catch (error) {
         console.error("Authentication check failed:", error);

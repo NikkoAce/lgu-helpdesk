@@ -19,7 +19,7 @@ async function initializeTicketsPage() {
         }
 
         // If authorized, set up the page and fetch initial data
-        setupEventListeners();
+        setupTicketPageEventListeners(); // Rename to avoid conflict
         fetchAndRenderTickets();
     } catch (error) {
         console.error("Authentication check failed:", error);
@@ -109,7 +109,9 @@ async function initializeTicketsPage() {
     }
 
     // --- 5. EVENT LISTENERS ---
-function setupEventListeners() {
+function setupTicketPageEventListeners() {
+    setupEventListeners(); // Call the main event listener setup from app.js
+
     const searchInput = document.getElementById('search-input');
     const statusFilter = document.getElementById('status-filter');
     const prevButton = document.getElementById('prev-button');

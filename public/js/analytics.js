@@ -21,6 +21,7 @@ async function initializeAnalyticsPage() {
 
         // If authorized, fetch the analytics data
         fetchAndRenderAnalytics();
+        setupEventListeners(); // Add this line
 
     } catch (error) {
         console.error("Authentication failed:", error);

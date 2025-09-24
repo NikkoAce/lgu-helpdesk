@@ -13,6 +13,7 @@ async function initializeNewTicketPage() {
 
         // If authenticated, set up the form event listeners.
         setupNewTicketForm();
+        setupEventListeners(); // Add this line
 
     } catch (error) {
         console.error("Authentication check failed:", error);

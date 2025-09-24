@@ -19,7 +19,7 @@ async function initializeUsersPage() {
         }
 
         // If authorized, set up the page and fetch initial data
-        setupEventListeners();
+        setupUserPageEventListeners(); // Rename to avoid conflict
         fetchAndRenderUsers();
     } catch (error) {
         console.error("Initialization check failed:", error);
@@ -124,7 +124,9 @@ async function initializeUsersPage() {
         if (deleteModal) deleteModal.close();
     }
 
-function setupEventListeners() {
+function setupUserPageEventListeners() {
+    setupEventListeners(); // Call the main event listener setup from app.js
+
     const tableBody = document.getElementById('users-table-body');
     const searchInput = document.getElementById('search-input');
 

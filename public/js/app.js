@@ -317,19 +317,11 @@ function setupEventListeners() {
     const menuButton = document.getElementById('menu-button');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
-    if (menuButton && sidebar && overlay) {
-        menuButton.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        });
-
-        overlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-        });
-    }
+    // The menu button is now a label for the drawer, so this JS is no longer needed.
+    // The drawer is handled by a hidden checkbox and CSS.
 }
 
+// This function is now called from each page's specific JS file.
 
 // --- Main Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
