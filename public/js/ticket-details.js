@@ -162,7 +162,7 @@ async function fetchTicketDetails() {
                         ${showDeleteButton ? `<button data-comment-id="${comment._id}" class="btn btn-link btn-error btn-xs p-0">Delete</button>` : ''}
                     </div>
                     ` : ''}
-                </div>` : ''}
+                </div>
             </div>
         `}).join('');
         
