@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, googleCallback } = require('../controllers/authController');
+const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, googleCallback, checkEmployeeId } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
@@ -9,6 +9,9 @@ router.post('/login', loginUser);
 router.post('/logout', logoutUser);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
+
+// A public route to check if an Employee ID is already in use.
+router.get('/check-employee-id/:id', checkEmployeeId);
 
 // A protected route to get the currently authenticated user's data
 router.get('/me', authMiddleware, getCurrentUser);

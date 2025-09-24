@@ -260,3 +260,30 @@ exports.googleCallback = (req, res) => {
     // Redirect the user back to the frontend dashboard.
     res.redirect(`${process.env.FRONTEND_URL}/dashboard.html`);
 };
+
+/**
+ * @desc    Check if an Employee ID is already registered
+ * @route   GET /api/auth/check-employee-id/:id
+ * @access  Public
+ */
+exports.checkEmployeeId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Employee ID is required.' });
+        }
+
+        const user = await User.findOne({ employeeId: id });
+
+        if (user) {
+            // Employee ID is taken
+            res.status(200).json({ isAvailable: false, message: 'Employee ID is already in use.' });
+        } else {
+            // Employee ID is available
+            res.status(200).json({ isAvailable: true });
+        }
+    } catch (error) {
+        console.error('Check Employee ID Error:', error);
+        res.status(500).json({ message: 'Error checking Employee ID.', error: error.message });
+    }
+};
