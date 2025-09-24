@@ -36,7 +36,7 @@ async function initializeUsersPage() {
     async function fetchAndRenderUsers(searchTerm = '') {
         const tableBody = document.getElementById('users-table-body');
         // Show a loading state in the table
-        tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading users...</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4"><span class="loading loading-spinner"></span></td></tr>`;
         try {
             const url = new URL(`${API_BASE_URL}/api/users`);
             if (searchTerm) {
@@ -50,20 +50,20 @@ async function initializeUsersPage() {
             usersCache = await response.json();
             renderTable(usersCache);
         } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-red-600">Error: ${error.message}</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-error">Error: ${error.message}</td></tr>`;
         }
     }
 
     function renderTable(users) {
         const tableBody = document.getElementById('users-table-body');
         if (users.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No users found.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4">No users found.</td></tr>`;
             return;
         }
         tableBody.innerHTML = ''; // Clear the table body
         users.forEach(user => {
             const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50';
+            row.className = 'hover';
            row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">${user.name}</div>
@@ -73,11 +73,11 @@ async function initializeUsersPage() {
                     <div class="text-sm text-gray-500">${user.office || 'N/A'}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-900">${user.role}</span>
+                    <span class="badge badge-ghost badge-sm">${user.role}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                    <button data-action="edit" data-userid="${user._id}" class="text-sky-600 hover:text-sky-900">Edit</button>
-                    <button data-action="delete" data-userid="${user._id}" class="text-red-600 hover:text-red-900">Delete</button>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                    <button data-action="edit" data-userid="${user._id}" class="btn btn-ghost btn-xs">Edit</button>
+                    <button data-action="delete" data-userid="${user._id}" class="btn btn-ghost btn-xs text-error">Delete</button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -90,31 +90,28 @@ async function initializeUsersPage() {
         const editUserName = document.getElementById('edit-user-name');
         const editUserOffice = document.getElementById('edit-user-office');
         const editRoleSelect = document.getElementById('edit-role-select');
-        const editMessage = document.getElementById('edit-message');
 
         selectedUserId = user._id;
         editUserName.value = user.name; // FIX: Use .value for input fields
         editUserOffice.value = user.office; // New
         editRoleSelect.value = user.role;
-        editMessage.textContent = '';
-        editModal.classList.remove('hidden');
+        editModal.showModal();
     }
 
     function openDeleteModal(user) {
         const deleteModal = document.getElementById('delete-user-modal');
         const deleteUserName = document.getElementById('delete-user-name');
-        const deleteMessage = document.getElementById('delete-message');
         selectedUserId = user._id;
         deleteUserName.textContent = user.name;
-        deleteMessage.textContent = '';
-        deleteModal.classList.remove('hidden');
+        deleteModal.showModal();
     }
 
     function closeModal() {
         const editModal = document.getElementById('edit-user-modal');
         const deleteModal = document.getElementById('delete-user-modal');
-        editModal.classList.add('hidden');
-        deleteModal.classList.add('hidden');
+        // Use the built-in close method for <dialog> elements
+        if (editModal) editModal.close();
+        if (deleteModal) deleteModal.close();
     }
 
 function setupEventListeners() {
@@ -168,10 +165,7 @@ function setupEventListeners() {
         // --- NEW: Set Loading State ---
         saveButton.disabled = true;
         saveButton.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+            <span class="loading loading-spinner"></span>
             Saving...
         `;
 
@@ -209,9 +203,13 @@ function setupEventListeners() {
     // Handle the delete confirmation
     if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener('click', async () => {
-        const deleteMessage = document.getElementById('delete-message');
-        deleteMessage.textContent = 'Deleting...';
-        deleteMessage.className = 'mt-4 text-sm text-gray-600';
+            const originalButtonText = confirmDeleteBtn.innerHTML;
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.innerHTML = `
+                <span class="loading loading-spinner"></span>
+                Deleting...
+            `;
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/users/${selectedUserId}`, {
                 method: 'DELETE',
@@ -223,6 +221,9 @@ function setupEventListeners() {
             closeModal();
         } catch (error) {
             showToast(`Error: ${error.message}`, 'error'); // Use toast for error
+        } finally {
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.innerHTML = originalButtonText;
         }
     });
     }
