@@ -1,6 +1,3 @@
-const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
-const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
-
 async function initializeNewTicketPage() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
