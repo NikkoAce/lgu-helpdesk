@@ -71,7 +71,7 @@ function setupNewTicketForm() {
         const ticketData = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('https://lgu-helpdesk-copy.onrender.com/api/tickets', {
+            const response = await fetch(`${API_BASE_URL}/api/tickets`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ticketData),
