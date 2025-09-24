@@ -100,10 +100,20 @@ async function initializeUsersPage() {
 
     function openDeleteModal(user) {
         const deleteModal = document.getElementById('delete-user-modal');
-        const deleteUserName = document.getElementById('delete-user-name');
+        const deleteUserNameConfirm = document.getElementById('delete-user-name-confirm');
+        const confirmInput = document.getElementById('delete-confirm-input');
+        const confirmBtn = document.getElementById('confirm-delete-btn');
+
         selectedUserId = user._id;
-        deleteUserName.textContent = user.name;
+        deleteUserNameConfirm.textContent = user.name;
+        confirmInput.value = ''; // Clear previous input
+        confirmBtn.disabled = true; // Disable button initially
         deleteModal.showModal();
+
+        // Add a listener to enable the button only when the name matches
+        confirmInput.oninput = () => {
+            confirmBtn.disabled = confirmInput.value !== user.name;
+        };
     }
 
     function closeModal() {

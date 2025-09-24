@@ -117,7 +117,11 @@
     <dialog id="delete-user-modal" class="modal">
         <div class="modal-box">
             <h3 class="font-bold text-lg">Confirm Deletion</h3>
-            <p class="mt-2 text-gray-600">Are you sure you want to delete the user <strong id="delete-user-name"></strong>? This action cannot be undone.</p>
+            <p class="mt-2 text-base-content/80">To confirm, please type the user's full name (<strong id="delete-user-name-confirm"></strong>) in the box below.</p>
+            <div class="form-control w-full mt-4">
+                <label for="delete-confirm-input" class="label"><span class="label-text">Confirm Name</span></label>
+                <input type="text" id="delete-confirm-input" class="input input-bordered w-full" autocomplete="off" />
+            </div>
             <div class="modal-action mt-6">
                 <button type="button" id="cancel-delete-btn" class="btn">Cancel</button>
                 <button type="button" id="confirm-delete-btn" class="btn btn-error">Delete User</button>

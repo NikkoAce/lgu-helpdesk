@@ -82,7 +82,9 @@ async function fetchAndRenderAnalytics() {
     function renderStatusChart(summary) {
         const chartCanvas = document.getElementById('status-chart');
         const ctx = chartCanvas.getContext('2d');
-        new Chart(ctx, {
+
+        // Store the chart instance in a variable
+        const statusChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ['New', 'In Progress', 'Resolved', 'Closed'],
@@ -114,6 +116,17 @@ async function fetchAndRenderAnalytics() {
                 }
             }
         });
+
+        // Add event listener for the export button
+        const exportBtn = document.getElementById('export-chart-btn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.href = statusChart.toBase64Image();
+                link.download = 'ticket-status-summary.png';
+                link.click();
+            });
+        }
     }
 
 document.addEventListener('DOMContentLoaded', initializeAnalyticsPage);

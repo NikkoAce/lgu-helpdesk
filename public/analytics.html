@@ -65,7 +65,10 @@
                 <!-- Chart Container -->
                 <div class="card mt-8 bg-base-100 shadow-md border">
                     <div class="card-body">
-                        <h2 class="card-title">Tickets by Status</h2>
+                        <div class="card-actions justify-between items-center">
+                            <h2 class="card-title">Tickets by Status</h2>
+                            <button id="export-chart-btn" class="btn btn-ghost btn-sm">Export as PNG</button>
+                        </div>
                         <div class="mt-4 h-80"><canvas id="status-chart"></canvas></div>
                     </div>
                 </div>
