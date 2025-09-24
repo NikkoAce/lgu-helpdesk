@@ -1,11 +1,7 @@
 async function initializeNewTicketPage() {
     try {
-        // First, run the main app initialization to authenticate and render common UI
-        await initializeApp();
-
         // If authenticated, set up the form event listeners.
         setupNewTicketForm();
-        setupEventListeners(); // Add this line
 
     } catch (error) {
         console.error("Authentication check failed:", error);

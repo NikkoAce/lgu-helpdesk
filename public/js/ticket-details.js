@@ -1,11 +1,7 @@
 async function initializeTicketDetailsPage() {
     try {
-        // First, run the main app initialization to authenticate and render common UI
-        await initializeApp();
-
         // Now that we are authenticated, fetch the ticket details
         fetchTicketDetails();
-        setupEventListeners(); // Add this line
 
     } catch (error) {
         console.error("Authentication check failed:", error);

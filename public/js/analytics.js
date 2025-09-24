@@ -1,8 +1,5 @@
 async function initializeAnalyticsPage() {
     try {
-        // First, run the main app initialization to authenticate and render common UI
-        await initializeApp();
-
         // Page protection: Only allow ICTO Head to see this page
         if (!currentUser || currentUser.role !== 'ICTO Head') {
             alert('Access Denied: This page is for administrators only.');
@@ -12,7 +9,6 @@ async function initializeAnalyticsPage() {
 
         // If authorized, fetch the analytics data
         fetchAndRenderAnalytics();
-        setupEventListeners(); // Add this line
 
     } catch (error) {
         console.error("Authentication failed:", error);

@@ -1,8 +1,5 @@
 async function initializeUsersPage() {
     try {
-        // First, run the main app initialization to authenticate and render common UI
-        await initializeApp();
-
         // Page protection: Only allow ICTO Head to see this page
         if (!currentUser || currentUser.role !== 'ICTO Head') {
             alert('Access Denied: This page is for administrators only.');
@@ -117,8 +114,6 @@ async function initializeUsersPage() {
     }
 
 function setupUserPageEventListeners() {
-    setupEventListeners(); // Call the main event listener setup from app.js
-
     const tableBody = document.getElementById('users-table-body');
     const searchInput = document.getElementById('search-input');
 

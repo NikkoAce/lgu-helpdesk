@@ -322,3 +322,20 @@ function setupEventListeners() {
 }
 
 // This function is now called from each page's specific JS file.
+
+// --- Main Entry Point ---
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+    setupEventListeners();
+});
+
+/**
+ * Listen for the pageshow event to handle cases where the page is loaded 
+ * from the back-forward cache (bfcache).
+ */
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        // Re-run initialization if the page is loaded from bfcache to ensure data is fresh.
+        initializeApp();
+    }
+});

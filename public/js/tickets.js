@@ -1,8 +1,5 @@
 async function initializeTicketsPage() {
     try {
-        // First, run the main app initialization to authenticate and render common UI
-        await initializeApp();
-
         // Page Protection: Only allow ICTO roles to access this page
         if (!currentUser || !currentUser.role.includes('ICTO')) {
             alert('Access Denied: This page is for ICTO staff only.');
@@ -102,8 +99,6 @@ async function initializeTicketsPage() {
 
     // --- 5. EVENT LISTENERS ---
 function setupTicketPageEventListeners() {
-    setupEventListeners(); // Call the main event listener setup from app.js
-
     const searchInput = document.getElementById('search-input');
     const statusFilter = document.getElementById('status-filter');
     const prevButton = document.getElementById('prev-button');
