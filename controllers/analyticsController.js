@@ -27,8 +27,9 @@ exports.getDashboardSummary = async (req, res) => {
 };
 
 exports.getMainAnalytics = async (req, res) => {
-    if (req.user.role !== 'ICTO Head') {
-        return res.status(403).json({ message: 'Forbidden' });
+    // Allow any user with 'ICTO' in their role to access analytics
+    if (!req.user.role || !req.user.role.includes('ICTO')) {
+        return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
     }
     try {
         const [totalTickets, newTickets, inProgressTickets, resolvedTickets, closedTickets] = await Promise.all([

@@ -46,6 +46,14 @@ let currentUser = null;
 let dashboardCurrentPage = 1;
 let dashboardTotalPages = 1;
 
+// --- NEW: Initialization Promise ---
+// This promise will resolve when the initial authentication and UI setup is complete.
+// Other scripts can await this promise to ensure currentUser is populated.
+let resolveAppInitialization;
+const appInitialization = new Promise(resolve => {
+    resolveAppInitialization = resolve;
+});
+
 /**
  * Checks authentication, fetches user data, and initializes the application.
  */
@@ -76,6 +84,9 @@ async function initializeApp() {
         if (document.getElementById('ticket-list-container')) {
             renderTickets();
         }
+
+        // --- NEW: Resolve the initialization promise ---
+        resolveAppInitialization();
 
     } catch (error) {
         console.error("Initialization failed:", error);

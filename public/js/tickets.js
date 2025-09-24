@@ -1,5 +1,6 @@
 async function initializeTicketsPage() {
     try {
+        await appInitialization; // Wait for app.js to set currentUser
         // Page Protection: Only allow ICTO roles to access this page
         if (!currentUser || !currentUser.role.includes('ICTO')) {
             alert('Access Denied: This page is for ICTO staff only.');
