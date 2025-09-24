@@ -44,7 +44,7 @@
                 <!-- User Info and Sign Out -->
                 <div class="flex items-center space-x-4">
                     <div id="user-info" class="text-right"></div>
-                    <button id="signout-button" class="rounded-md bg-red-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-600">Sign Out</button>
+                    <button id="signout-button" class="btn btn-error btn-sm text-white">Sign Out</button>
                 </div>
             </header>
 
@@ -54,18 +54,19 @@
                 <p class="mt-2 text-gray-600">An overview of the helpdesk system's performance.</p>
 
                 <!-- Stat Cards -->
-                <div id="stats-cards-container" class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+                <div id="stats-cards-container" class="stats stats-vertical lg:stats-horizontal shadow w-full mt-8">
                     <!-- A loading skeleton -->
-                    <div class="col-span-full rounded-lg bg-white p-5 text-center shadow">
-                        <p class="text-gray-500">Loading analytics data...</p>
+                    <div class="stat place-items-center">
+                        <div class="stat-title">Loading analytics data...</div>
+                        <div class="stat-value"><span class="loading loading-dots loading-md"></span></div>
                     </div>
                 </div>
 
                 <!-- Chart Container -->
-                <div class="mt-8 rounded-lg border bg-white p-6 shadow-md">
-                    <h2 class="text-xl font-semibold text-gray-800">Tickets by Status</h2>
-                    <div class="mt-4 h-80">
-                        <canvas id="status-chart"></canvas>
+                <div class="card mt-8 bg-base-100 shadow-md border">
+                    <div class="card-body">
+                        <h2 class="card-title">Tickets by Status</h2>
+                        <div class="mt-4 h-80"><canvas id="status-chart"></canvas></div>
                     </div>
                 </div>
             </main>

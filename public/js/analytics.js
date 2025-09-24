@@ -52,25 +52,25 @@ async function fetchAndRenderAnalytics() {
     function renderStatCards(summary) {
         const statsContainer = document.getElementById('stats-cards-container');
         statsContainer.innerHTML = `
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">Total Tickets</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">${summary.totalTickets}</dd>
+            <div class="stat">
+                <div class="stat-title">Total Tickets</div>
+                <div class="stat-value">${summary.totalTickets}</div>
             </div>
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">New</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-blue-600">${summary.new}</dd>
+            <div class="stat">
+                <div class="stat-title">New</div>
+                <div class="stat-value text-info">${summary.new}</div>
             </div>
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">In Progress</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">${summary.inProgress}</dd>
+            <div class="stat">
+                <div class="stat-title">In Progress</div>
+                <div class="stat-value text-warning">${summary.inProgress}</div>
             </div>
-            <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">Resolved</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-green-600">${summary.resolved}</dd>
+            <div class="stat">
+                <div class="stat-title">Resolved</div>
+                <div class="stat-value text-success">${summary.resolved}</div>
             </div>
-             <div class="overflow-hidden rounded-lg bg-white p-5 shadow">
-                <dt class="truncate text-sm font-medium text-gray-500">Closed</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-600">${summary.closed}</dd>
+             <div class="stat">
+                <div class="stat-title">Closed</div>
+                <div class="stat-value text-base-content/60">${summary.closed}</div>
             </div>
         `;
     }
