@@ -22,9 +22,9 @@
         </aside>
 
         <!-- Main Content Area -->
-        <div class="flex flex-1 flex-col">
+        <div class="flex flex-1 flex-col overflow-y-auto">
             <!-- Header -->
-            <header class="flex h-16 w-full items-center justify-between border-b bg-white px-4 lg:px-6">
+            <header class="sticky top-0 z-10 flex h-16 w-full flex-shrink-0 items-center justify-between border-b bg-white px-4 lg:px-6">
                 <!-- Mobile Menu Button (visible on small screens) -->
                 <div class="flex items-center">
                     <button id="menu-button" class="text-gray-500 focus:outline-none lg:hidden">
@@ -43,7 +43,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-6 md:p-8">
+            <main class="flex-1 p-6 md:p-8">
                 <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
                 
                 <!-- NEW: Personalized Stat Cards -->
