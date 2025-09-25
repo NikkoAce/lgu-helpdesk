@@ -74,8 +74,9 @@ async function initializeApp() {
         currentUser = await response.json();
 
         // --- If authenticated, render all page components ---
-        renderSidebar();
-        renderHeader();
+        renderSidebar(currentUser);
+        renderHeader(currentUser);
+        setupLayoutEventListeners(); // Set up listeners for the newly rendered layout
 
         // Only render dashboard-specific components if they exist on the current page
         if (document.getElementById('dashboard-stats-container')) {
@@ -199,55 +200,6 @@ async function renderTickets() {
 }
 
 /**
- * Populates the sidebar navigation based on the user's role.
- */
-function renderSidebar() {
-    const sidebarNav = document.getElementById('sidebar-nav');
-    if (!sidebarNav || !currentUser) return;
-
-    const navLinksData = {
-        common: [
-            { name: 'Dashboard', href: 'app.html', icon: getIcon('home') },
-            { name: 'New Ticket', href: 'new-ticket.html', icon: getIcon('ticket') },
-        ],
-        icto: [{ name: 'All Tickets', href: 'tickets.html', icon: getIcon('document') }],
-        admin: [
-            { name: 'Analytics', href: 'analytics.html', icon: getIcon('chart') },
-            { name: 'User Management', href: 'users.html', icon: getIcon('users') },
-        ]
-    };
-
-    let linksToRender = [];
-    if (currentUser.role.includes('ICTO')) { // ICTO Staff and ICTO Head
-        linksToRender = [navLinksData.common[0], ...navLinksData.icto, navLinksData.common[1], ...navLinksData.admin];
-    } else { // Regular Employees and Department Heads
-        linksToRender = navLinksData.common;
-    }
-
-    const currentPage = window.location.pathname.split('/').pop();
-    sidebarNav.innerHTML = linksToRender.map(link => {
-        const isActive = link.href === currentPage;
-        const activeClass = 'bg-sky-600 text-white';
-        const inactiveClass = 'text-slate-300 hover:bg-slate-700 hover:text-white';
-        return `
-            <a href="${link.href}" class="flex items-center rounded-md px-4 py-2 text-sm font-medium ${isActive ? activeClass : inactiveClass}">
-                ${link.icon}<span>${link.name}</span>
-            </a>`;
-    }).join('');
-}
-
-/**
- * Populates the header with the current user's information.
- */
-function renderHeader() {
-    const userInfo = document.getElementById('user-info');
-    if (!userInfo || !currentUser) return;
-    userInfo.innerHTML = `
-        <p class="text-sm font-semibold text-gray-800">${currentUser.name}</p>
-        <p class="text-xs text-gray-500">${currentUser.role}</p>`;
-}
-
-/**
  * Returns SVG strings for icons.
  */
 function getIcon(name) {
@@ -282,24 +234,6 @@ function renderDashboardPagination() {
  * Sets up all non-authentication-dependent event listeners.
  */
 function setupEventListeners() {
-    // Sign Out Button
-    const signOutButton = document.getElementById('signout-button');
-    if (signOutButton) {
-        signOutButton.addEventListener('click', async () => {
-            try {
-                await fetch(`${API_BASE_URL}/api/auth/logout`, {
-                    method: 'POST',
-                    credentials: 'include',
-                });
-            } catch (error) {
-                console.error('Logout request failed:', error);
-            } finally {
-                // Always redirect to the portal login page after attempting to log out.
-                window.location.href = PORTAL_LOGIN_URL;
-            }
-        });
-    }
-
     // Dashboard Pagination
     const prevButton = document.getElementById('dashboard-prev-button');
     if (prevButton) {
@@ -318,22 +252,6 @@ function setupEventListeners() {
                 dashboardCurrentPage++;
                 renderTickets();
             }
-        });
-    }
-
-    // Mobile Responsiveness
-    const menuButton = document.getElementById('menu-button');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    if (menuButton && sidebar && overlay) {
-        menuButton.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        });
-
-        overlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
         });
     }
 }
