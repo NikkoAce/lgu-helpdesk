@@ -1,8 +1,8 @@
 async function initializeUsersPage() {
     try {
         // Page protection: Only allow ICTO Head to see this page
-        if (!currentUser || !currentUser.role.includes('ICTO')) {
-            alert('Access Denied: This page is for ICTO staff only.');
+        if (!currentUser || currentUser.role !== 'ICTO Head') {
+            alert('Access Denied: This page is for the ICTO Head only.');
             window.location.href = 'app.html';
             return;
         }
