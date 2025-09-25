@@ -261,7 +261,10 @@ exports.ssoRedirectHelpdesk = async (req, res) => {
             return res.status(500).send('SSO configuration error. Please contact an administrator.');
         }
 
-        res.redirect(helpdeskFrontendUrl);
+        // Append the specific entry page to the base URL to avoid 404 errors on Netlify.
+        const redirectUrl = `${helpdeskFrontendUrl.replace(/\/$/, '')}/app.html`;
+
+        res.redirect(redirectUrl);
 
     } catch (error) {
         console.error('SSO Redirect Error for Helpdesk:', error);
