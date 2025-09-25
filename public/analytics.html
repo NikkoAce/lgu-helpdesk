@@ -12,16 +12,16 @@
     <script src="js/analytics.js" defer></script>
 </head>
 <body class="bg-gray-50">
-    <div class="relative min-h-screen">
+    <!-- Header -->
+    <div id="header-container" class="sticky top-0 z-30"></div>
+
+    <div class="relative min-h-screen lg:flex">
         <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col h-screen flex-1 lg:ml-64">
-            <!-- Header -->
-            <div id="header-container"></div>
-
-            <!-- Page Content -->
+        <div class="flex-1">
+             <!-- Page Content -->
             <main class="flex-1 overflow-y-auto p-6 md:p-8">
                 <h1 class="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
                 <p class="mt-2 text-gray-600">An overview of the helpdesk system's performance.</p>
