@@ -20,7 +20,7 @@ function renderSidebar(currentUser) {
 
     let linksToRender = [];
     if (currentUser.role.includes('ICTO')) { // ICTO Staff and ICTO Head
-        linksToRender = [navLinksData.common[0], ...navLinksData.icto, navLinksData.common[1], ...navLinksData.admin];
+        linksToRender = [...navLinksData.common, ...navLinksData.icto, ...navLinksData.admin];
     } else { // Regular Employees and Department Heads
         linksToRender = navLinksData.common;
     }
