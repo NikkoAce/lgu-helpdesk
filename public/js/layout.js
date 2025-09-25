@@ -40,7 +40,11 @@ function renderSidebar(currentUser) {
         <!-- Mobile Overlay -->
         <div id="overlay" class="fixed inset-0 z-30 hidden bg-black bg-opacity-50 lg:hidden"></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-slate-900 text-white transition-transform duration-300 ease-in-out lg:sticky lg:translate-x-0 lg:h-screen">
+        <aside id="sidebar"
+  class="flex w-64 flex-col bg-slate-900 text-white 
+         transition-transform duration-300 ease-in-out
+         fixed inset-y-0 left-0 z-40 -translate-x-full 
+         lg:static lg:translate-x-0 lg:h-screen">
             <div class="flex h-32 flex-col items-center justify-center border-b border-slate-700 px-4">
                 <img src="images/LGU-DAET LOGO.jpg" alt="LGU Logo" class="h-16 w-16 rounded-full object-contain">
                 <span class="text-lg font-bold text-white">LGU-Daet IT Helpdesk</span>
