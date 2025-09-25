@@ -59,7 +59,7 @@ function renderHeader(currentUser) {
     if (!headerContainer || !currentUser) return;
 
     headerContainer.innerHTML = `
-        <header class="sticky top-0 z-10 flex h-16 w-full flex-shrink-0 items-center justify-between border-b bg-white px-4 lg:px-6">
+        <header class="flex h-16 w-full flex-shrink-0 items-center justify-between border-b bg-white px-4 lg:px-6">
             <!-- Mobile Menu Button (visible on small screens) -->
             <div class="flex items-center">
                 <button id="menu-button" class="text-gray-500 focus:outline-none lg:hidden">
