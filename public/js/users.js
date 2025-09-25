@@ -1,5 +1,6 @@
 async function initializeUsersPage() {
     try {
+        await appInitialization; // Wait for app.js to set currentUser
         // Page protection: Only allow ICTO Head to see this page
         if (!currentUser || currentUser.role !== 'ICTO Head') {
             alert('Access Denied: This page is for the ICTO Head only.');
