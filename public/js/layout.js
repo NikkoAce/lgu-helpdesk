@@ -40,7 +40,7 @@ function renderSidebar(currentUser) {
         <!-- Mobile Overlay -->
         <div id="overlay" class="fixed inset-0 z-30 hidden bg-black bg-opacity-50 lg:hidden"></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-slate-900 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-slate-900 text-white transition-transform duration-300 ease-in-out lg:translate-x-0">
             <div class="flex h-32 flex-col items-center justify-center border-b border-slate-700 px-4">
                 <img src="images/LGU-DAET LOGO.jpg" alt="LGU Logo" class="h-16 w-16 rounded-full object-contain">
                 <span class="text-lg font-bold text-white">LGU-Daet IT Helpdesk</span>
@@ -59,7 +59,7 @@ function renderHeader(currentUser) {
     if (!headerContainer || !currentUser) return;
 
     headerContainer.innerHTML = `
-        <header class="flex h-16 w-full flex-shrink-0 items-center justify-between border-b bg-white px-4 lg:px-6">
+        <header class="sticky top-0 z-10 flex h-16 w-full flex-shrink-0 items-center justify-between border-b bg-white px-4 lg:px-6">
             <!-- Mobile Menu Button (visible on small screens) -->
             <div class="flex items-center">
                 <button id="menu-button" class="text-gray-500 focus:outline-none lg:hidden">
