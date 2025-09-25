@@ -45,7 +45,16 @@ function renderSidebar(currentUser) {
                 <img src="images/LGU-DAET LOGO.jpg" alt="LGU Logo" class="h-16 w-16 rounded-full object-contain">
                 <span class="text-lg font-bold text-white">LGU-Daet IT Helpdesk</span>
             </div>
-            <nav id="sidebar-nav" class="flex-1 space-y-2 p-4">${navHTML}</nav>
+            <nav class="flex-1 space-y-2 p-4">${navHTML}</nav>
+            
+            <!-- Sidebar Footer with User Info -->
+            <div class="border-t border-slate-700 p-4">
+                <div class="text-left">
+                    <p class="text-sm font-semibold text-white">${currentUser.name}</p>
+                    <p class="text-xs text-slate-400">${currentUser.role}</p>
+                </div>
+                <button id="signout-button" class="btn btn-error btn-sm text-white w-full mt-4">Sign Out</button>
+            </div>
         </aside>
     `;
 }
@@ -57,29 +66,10 @@ function renderSidebar(currentUser) {
 function renderHeader(currentUser) {
     const headerContainer = document.getElementById('header-container');
     if (!headerContainer || !currentUser) return;
-
-    headerContainer.innerHTML = `
-        <header class="sticky top-0 z-10 flex h-16 w-full flex-shrink-0 items-center justify-between border-b bg-white px-4 lg:px-6">
-            <!-- Mobile Menu Button (visible on small screens) -->
-            <div class="flex items-center">
-                <button id="menu-button" class="text-gray-500 focus:outline-none lg:hidden">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-                <h1 class="text-xl font-semibold text-gray-800 ml-2 lg:hidden">Dashboard</h1>
-            </div>
-
-            <!-- User Info and Sign Out -->
-            <div class="flex items-center space-x-4">
-                <div id="user-info" class="text-right">
-                    <p class="text-sm font-semibold text-gray-800">${currentUser.name}</p>
-                    <p class="text-xs text-gray-500">${currentUser.role}</p>
-                </div>
-                <button id="signout-button" class="btn btn-error btn-sm text-white">Sign Out</button>
-            </div>
-        </header>
-    `;
+    
+    // The header is no longer needed with the new design.
+    // We remove the container to keep the DOM clean.
+    headerContainer.remove();
 }
 
 /**
@@ -103,25 +93,15 @@ function setupLayoutEventListeners() {
         }
     });
 
-    // Mobile Responsiveness
-    // We use event delegation on the document for the mobile menu button.
+    // Mobile Responsiveness for closing the sidebar
     document.addEventListener('click', (event) => {
-        const menuButton = event.target.closest('#menu-button');
-        if (menuButton) {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            if (sidebar && overlay) {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('hidden');
-            }
-        }
-
         // Also handle clicking the overlay to close the menu
         if (event.target.id === 'overlay') {
             const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
+            const overlay = document.getElementById('overlay');
+            if (sidebar && overlay) {
                 sidebar.classList.add('-translate-x-full');
-                event.target.classList.add('hidden');
+                overlay.classList.add('hidden');
             }
         }
     });
