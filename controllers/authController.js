@@ -246,6 +246,30 @@ exports.ssoRedirectGso = async (req, res) => {
 };
 
 /**
+ * @desc    Handles SSO redirect to the IT Helpdesk system.
+ * @route   GET /api/auth/sso/redirect/helpdesk
+ * @access  Private (requires HttpOnly cookie)
+ */
+exports.ssoRedirectHelpdesk = async (req, res) => {
+    try {
+        // The user is already authenticated via the HttpOnly cookie (verified by authMiddleware).
+        // We just need to redirect them to the correct frontend.
+        const helpdeskFrontendUrl = process.env.HELPDESK_FRONTEND_URL;
+
+        if (!helpdeskFrontendUrl) {
+            console.error(`SSO Error: HELPDESK_FRONTEND_URL is not defined in environment variables.`);
+            return res.status(500).send('SSO configuration error. Please contact an administrator.');
+        }
+
+        res.redirect(helpdeskFrontendUrl);
+
+    } catch (error) {
+        console.error('SSO Redirect Error for Helpdesk:', error);
+        res.status(500).send('An error occurred during the single sign-on process.');
+    }
+};
+
+/**
  * @desc    Handles the callback after Google has authenticated the user
  * @route   GET /api/auth/google/callback
  * @access  Public (via redirect)

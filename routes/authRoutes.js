@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, googleCallback, checkEmployeeId } = require('../controllers/authController');
+const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, ssoRedirectHelpdesk, googleCallback, checkEmployeeId } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
@@ -18,6 +18,9 @@ router.get('/me', authMiddleware, getCurrentUser);
 
 // A protected route to handle Single Sign-On redirects to the GSO system
 router.get('/sso/redirect/gso', authMiddleware, ssoRedirectGso);
+
+// NEW: A protected route to handle Single Sign-On redirects to the IT Helpdesk system
+router.get('/sso/redirect/helpdesk', authMiddleware, ssoRedirectHelpdesk);
 
 // --- Google OAuth Routes ---
 
