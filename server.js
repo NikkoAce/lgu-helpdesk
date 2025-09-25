@@ -38,6 +38,10 @@ const corsOptions = {
 // This allows Passport to correctly determine the `https` protocol from proxy headers.
 app.set('trust proxy', 1);
 
+// --- NEW: Handle preflight requests for all routes ---
+// This must come before other routes and middleware.
+app.options('*', cors(corsOptions));
+
 app.use(cors(corsOptions)); // Use the new options
 app.use(express.json());
 app.use(cookieParser()); // To parse cookies from incoming requests
