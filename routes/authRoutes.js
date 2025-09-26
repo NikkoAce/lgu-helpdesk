@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, ssoRedirectHelpdesk, googleCallback, checkEmployeeId } = require('../controllers/authController');
+const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, ssoRedirectHelpdesk, googleCallback, checkEmployeeId, changePassword } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
+
+// A protected route for a logged-in user to change their password
+router.put('/change-password', authMiddleware, changePassword);
+
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 

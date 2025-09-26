@@ -142,7 +142,7 @@ async function fetchTicketDetails() {
                     ${comment.attachmentUrl ? `
                     <div class="card-actions items-center">
                         <a href="${comment.attachmentUrl}" target="_blank" rel="noopener noreferrer" class="link link-primary text-sm">View Attachment</a>
-                        ${showDeleteButton ? `<button data-comment-id="${comment._id}" class="btn btn-link btn-error btn-xs p-0">Delete</button>` : ''}
+                        ${showDeleteButton ? `<button data-comment-id="${comment._id}" class="btn btn-link btn-error btn-xs p-0 delete-attachment-btn">Delete</button>` : ''}
                     </div>
                     ` : ''}
                 </div>
