@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getAllTickets, createTicket, getTicketById, addComment, updateTicketStatus, deleteAttachment } = require('../controllers/ticketController');
-const authMiddleware = require('../middleware/authMiddleware');
-const upload = require('../config/multer');
+const { getAllTickets, createTicket, getTicketById, addComment, updateTicketStatus, deleteAttachment } = require('./ticket.controller.js');
+const authMiddleware = require('../../middleware/auth.middleware.js');
+const upload = require('../../config/multer.config.js');
 
 router.get('/', authMiddleware, getAllTickets);
 router.post('/', authMiddleware, createTicket);

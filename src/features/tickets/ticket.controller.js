@@ -1,4 +1,4 @@
-const Ticket = require('../models/Ticket'); 
+const Ticket = require('./ticket.model.js'); 
 const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
 

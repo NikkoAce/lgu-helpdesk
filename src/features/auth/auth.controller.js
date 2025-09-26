@@ -1,9 +1,8 @@
-const User = require('../models/User'); // We will create this model file next
+const User = require('../users/user.model.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const SibApiV3Sdk = require('@sendinblue/client'); // Brevo SDK
-const { sendEmail } = require('../utils/emailService');
+const { sendEmail } = require('../../services/email.service.js');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 

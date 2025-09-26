@@ -1,4 +1,4 @@
-const Ticket = require('../models/Ticket');
+const Ticket = require('../tickets/ticket.model.js');
 
 exports.getDashboardSummary = async (req, res) => {
     try {

@@ -1,6 +1,5 @@
-const User = require('../models/User');
-const SibApiV3Sdk = require('@sendinblue/client');
-const { sendEmail } = require('../utils/emailService'); // We will create this utility
+const User = require('./user.model.js');
+const { sendEmail } = require('../../services/email.service.js');
 
 exports.getAllUsers = async (req, res) => {
     // Allow any user with 'ICTO' in their role to access this

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboardSummary, getMainAnalytics } = require('../controllers/analyticsController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { getDashboardSummary, getMainAnalytics } = require('./analytics.controller.js');
+const authMiddleware = require('../../middleware/auth.middleware.js');
 
 // Route for the main dashboard's personalized stats
 router.get('/dashboard-summary', authMiddleware, getDashboardSummary);

@@ -61,7 +61,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-require('./config/passport'); // Initialize passport configuration from its new location
+require('./src/config/passport.js'); // Initialize passport configuration
 
 // --- Use morgan for detailed request logging ---
 app.use(morgan('dev'));
@@ -76,10 +76,10 @@ mongoose.connect(MONGO_URI, { readPreference: 'primary' })
 
 
 // --- API ROUTES ---
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/tickets', require('./routes/ticketRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/analytics', require('./routes/analyticsRoutes')); 
+app.use('/api/auth', require('./src/features/auth/auth.routes.js'));
+app.use('/api/tickets', require('./src/features/tickets/ticket.routes.js'));
+app.use('/api/users', require('./src/features/users/user.routes.js'));
+app.use('/api/analytics', require('./src/features/analytics/analytics.routes.js')); 
 
 
 

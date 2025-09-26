@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, updateUser, deleteUser, getMe, updateUserProfile, getGsoOffices } = require('../controllers/userController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { getAllUsers, updateUser, deleteUser, getMe, updateUserProfile, getGsoOffices, updateUserStatus } = require('./user.controller.js');
+const authMiddleware = require('../../middleware/auth.middleware.js');
 
 // This new route will allow other systems to verify a user's token.
 // It's placed before other routes with parameters to avoid conflicts.
@@ -20,7 +20,7 @@ router.get('/', authMiddleware, getAllUsers);
 
 // IMPORTANT: More specific routes must come before general routes with parameters.
 // '/:id/status' must be before '/:id'.
-router.patch('/:id/status', authMiddleware, require('../controllers/userController').updateUserStatus); // Approve/Reject
+router.patch('/:id/status', authMiddleware, updateUserStatus); // Approve/Reject
 router.patch('/:id', authMiddleware, updateUser); // Edit
 router.delete('/:id', authMiddleware, deleteUser); // Delete
 

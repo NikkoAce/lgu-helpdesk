@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const rateLimit = require('express-rate-limit');
-const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, ssoRedirectHelpdesk, googleCallback, checkEmployeeId, changePassword } = require('../controllers/authController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { registerUser, loginUser, forgotPassword, resetPassword, logoutUser, getCurrentUser, ssoRedirectGso, ssoRedirectHelpdesk, googleCallback, checkEmployeeId, changePassword } = require('./auth.controller.js');
+const authMiddleware = require('../../middleware/auth.middleware.js');
 
 // --- Rate Limiter for Password Reset ---
 // This prevents abuse of the forgot password endpoint by limiting requests from a single IP.
