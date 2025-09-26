@@ -1,9 +1,8 @@
 require('dotenv').config();
 
-// --- Robust Module Aliasing ---
-// This must come before any other require statements that use the alias.
-const moduleAlias = require('module-alias');
-moduleAlias.addAlias('@', __dirname); // The '@' alias now points to the project root.
+// Add the 'src' directory to the module search path.
+// This allows for absolute-like imports from the 'src' root (e.g., 'features/users/user.model.js').
+require('app-module-path').addPath(__dirname + '/src');
 
 const express = require('express');
 const cors = require('cors');
@@ -58,7 +57,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-require('@/src/config/passport.js'); // Use module alias
+require('config/passport.js'); // Path is now relative to 'src'
 
 // --- Use morgan for detailed request logging ---
 app.use(morgan('dev'));
@@ -69,10 +68,10 @@ mongoose.connect(MONGO_URI, { readPreference: 'primary' })
     .catch(err => console.error('MongoDB connection error:', err));
 
 // --- API ROUTES ---
-app.use('/api/auth', require('@/src/features/auth/auth.routes.js'));
-app.use('/api/tickets', require('@/src/features/tickets/ticket.routes.js'));
-app.use('/api/users', require('@/src/features/users/user.routes.js'));
-app.use('/api/analytics', require('@/src/features/analytics/analytics.routes.js'));
+app.use('/api/auth', require('features/auth/auth.routes.js'));
+app.use('/api/tickets', require('features/tickets/ticket.routes.js'));
+app.use('/api/users', require('features/users/user.routes.js'));
+app.use('/api/analytics', require('features/analytics/analytics.routes.js'));
 
 // --- START SERVER ---
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
