@@ -42,6 +42,35 @@ exports.registerUser = async (req, res) => {
             status: 'Pending' // Explicitly set status to Pending
         });
         await newUser.save();
+
+        // --- NEW: Send email notification to admin for approval ---
+        try {
+            const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+            if (adminEmail) {
+                const userManagementUrl = `${process.env.FRONTEND_URL}/users.html`;
+                await sendEmail({
+                    to: adminEmail,
+                    subject: 'New User Registration Awaiting Approval',
+                    htmlContent: `
+                        <p>Hello Administrator,</p>
+                        <p>A new user has registered and is awaiting your approval.</p>
+                        <ul>
+                            <li><strong>Name:</strong> ${newUser.name}</li>
+                            <li><strong>Email:</strong> ${newUser.email}</li>
+                            <li><strong>Employee ID:</strong> ${newUser.employeeId}</li>
+                        </ul>
+                        <p>Please visit the User Management page to approve or reject this registration.</p>
+                        <p><a href="${userManagementUrl}" style="font-family: sans-serif; font-size: 14px; font-weight: bold; text-decoration: none; color: #ffffff; background-color: #0ea5e9; border: 15px solid #0ea5e9; border-radius: 3px; display: inline-block;">Go to User Management</a></p>
+                        <p>Thank you,<br>LGU Employee Portal System</p>
+                    `,
+                    textContent: `Hello Administrator,\n\nA new user has registered and is awaiting your approval.\n\nDetails:\nName: ${newUser.name}\nEmail: ${newUser.email}\nEmployee ID: ${newUser.employeeId}\n\nPlease visit the User Management page to approve or reject this registration: ${userManagementUrl}\n\nThank you,\nLGU Employee Portal System`
+                });
+            }
+        } catch (emailError) {
+            // Log the email error but don't fail the registration process for the user.
+            console.error('Failed to send admin notification email:', emailError.message);
+        }
+
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
         res.status(500).json({ message: 'Error registering user', error: error.message });
