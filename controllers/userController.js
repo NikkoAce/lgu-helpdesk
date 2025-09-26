@@ -1,28 +1,38 @@
 const User = require('../models/User');
-const mongoose = require('mongoose');
-
-
+const SibApiV3Sdk = require('@sendinblue/client');
 
 exports.getAllUsers = async (req, res) => {
-    // ... (logic for fetching all users)
     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
     try {
-        const { search } = req.query;
+        const { search, status } = req.query;
         let query = {};
 
+        // --- REFACTOR: Filter by status from a single endpoint ---
+        // The frontend will pass 'Pending' or 'Active' to get the correct list.
+        if (status === 'Pending') {
+            query.status = 'Pending';
+        } else {
+            // Default to showing active/existing users.
+            // Includes 'Active' and legacy users who might not have a status field yet.
+            query.status = { $in: ['Active', undefined, null] };
+        }
+
         if (search) {
-            const searchRegex = new RegExp(search, 'i'); // 'i' for case-insensitive
-            query = {
-                $or: [
+            const searchRegex = new RegExp(search, 'i');
+            // Combine the existing status filter with the new search filter
+            query.$and = [
+                { status: query.status }, // The original status condition
+                { $or: [ // And any of these fields must match the search term
                     { name: searchRegex },
                     { email: searchRegex },
                     { office: searchRegex },
                     { employeeId: searchRegex }
-                ]
-            };
+                ]}
+            ];
+            delete query.status; // Remove the top-level status, as it's now inside $and
         }
 
-        const users = await User.find(query).select('-password').sort({ name: 1 });
+        const users = await User.find(query).select('-password -passwordResetToken -passwordResetExpires').sort({ name: 1 });
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching users', error: error.message });
