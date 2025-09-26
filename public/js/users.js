@@ -28,6 +28,7 @@ async function initializeUsersPage() {
         try {
             const url = new URL(`${window.API_BASE_URL}/api/users`);
             if (searchTerm) {
+                url.searchParams.append('status', status); // Pass status along with search
                 url.searchParams.append('search', searchTerm.trim());
             }
 
@@ -225,14 +226,15 @@ function setupUserPageEventListeners() {
         if (!button) return;
 
         const action = button.dataset.action;
-        const userId = button.dataset.userid;
-        if (!action || !userId) return;
+        const userid = button.dataset.userid;
+        if (!action || !userid) return;
 
-        const user = usersCache.find(u => u._id === userId);
+        const user = usersCache.find(u => u._id === userid);
         if (!user) return;
 
-        if (action === 'edit') openEditModal(user); // Existing actions
+        if (action === 'edit') openEditModal(user);
         if (action === 'delete') openDeleteModal(user);
+        if (action === 'approve' || action === 'reject') handleUserStatusAction(userid, action);
     });
     }
 
@@ -262,7 +264,8 @@ function setupUserPageEventListeners() {
             const response = await fetch(`${window.API_BASE_URL}/api/users/${selectedUser._id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData)
+                body: JSON.stringify(updatedData),
+                credentials: 'include' // IMPORTANT: Send the auth cookie
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
@@ -295,7 +298,8 @@ function setupUserPageEventListeners() {
 
         try {
             const response = await fetch(`${window.API_BASE_URL}/api/users/${selectedUser._id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include' // IMPORTANT: Send the auth cookie
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
@@ -343,15 +347,6 @@ function setupUserPageEventListeners() {
             showToast(`Error: ${error.message}`, 'error');
         }
     };
-
-    // Add listener for approve/reject buttons
-    tableBody.addEventListener('click', (e) => {
-        const button = e.target.closest('button[data-action="approve"], button[data-action="reject"]');
-        if (button) {
-            const { action, userid } = button.dataset;
-            handleUserStatusAction(userid, action);
-        }
-    });
 
     // Handle cancel buttons
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeModal);

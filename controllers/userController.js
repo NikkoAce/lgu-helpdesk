@@ -10,30 +10,21 @@ exports.getAllUsers = async (req, res) => {
     try {
         const { search, status } = req.query;
         let query = {};
-
-        // --- REFACTOR: Filter by status from a single endpoint ---
-        // The frontend will pass 'Pending' or 'Active' to get the correct list.
-        if (status === 'Pending') {
-            query.status = 'Pending';
-        } else {
-            // Default to showing active/existing users.
-            // Includes 'Active' and legacy users who might not have a status field yet.
-            query.status = { $in: ['Active', undefined, null] };
+ 
+        // Apply status filter
+        if (status) {
+            query.status = status;
         }
-
+ 
+        // Apply search filter
         if (search) {
             const searchRegex = new RegExp(search, 'i');
-            // Combine the existing status filter with the new search filter
-            query.$and = [
-                { status: query.status }, // The original status condition
-                { $or: [ // And any of these fields must match the search term
-                    { name: searchRegex },
-                    { email: searchRegex },
-                    { office: searchRegex },
-                    { employeeId: searchRegex }
-                ]}
+            query.$or = [
+                { name: searchRegex },
+                { email: searchRegex },
+                { office: searchRegex },
+                { employeeId: searchRegex }
             ];
-            delete query.status; // Remove the top-level status, as it's now inside $and
         }
 
         const users = await User.find(query).select('-password -passwordResetToken -passwordResetExpires').sort({ name: 1 });
