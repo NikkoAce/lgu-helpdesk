@@ -11,6 +11,6 @@
   publish = "public"
 
 [build.environment]
-  # It's good practice to specify the Node.js version.
   # This should match the version you use for local development.
   NODE_VERSION = "18"
+
