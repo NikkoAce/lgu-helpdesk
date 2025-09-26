@@ -318,6 +318,7 @@ function setupUserPageEventListeners() {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: status === 'approve' ? 'Active' : 'Rejected' }),
+                credentials: 'include' // IMPORTANT: Send the auth cookie with the request
             });
 
             const result = await response.json();
