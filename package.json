@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "build": "./node_modules/.bin/tailwindcss -i ./public/input.css -o ./public/css/style.css --minify",
-    "watch:css": "tailwindcss -i ./public/input.css -o ./public/css/style.css --watch"
+    "watch:css": "./node_modules/.bin/tailwindcss -i ./public/input.css -o ./public/css/style.css --watch"
   },
   "keywords": [],
   "author": "",
