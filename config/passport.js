@@ -39,7 +39,9 @@ passport.use(
                         // Set default values. These can be updated later in their profile.
                         employmentType: 'Permanent',
                         role: 'Employee',
-                        office: 'Unassigned'
+                        office: 'Unassigned',
+                        // Users signing up via Google are automatically considered active
+                        status: 'Active'
                     });
                     return done(null, newUser);
                 }

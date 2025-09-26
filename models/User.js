@@ -16,7 +16,10 @@ const userSchema = new mongoose.Schema({
     googleId: { type: String },
 
     passwordResetToken: String,
-    passwordResetExpires: Date
+    passwordResetExpires: Date,
+
+    // NEW: Add status field to track user state (Pending, Active, Rejected)
+    status: { type: String, required: true, default: 'Pending' }
 }, { timestamps: true }); // Added timestamps for better record tracking
 
 // To prevent duplicate employee IDs for users who do register with one,

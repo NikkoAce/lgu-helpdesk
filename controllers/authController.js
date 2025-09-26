@@ -294,6 +294,12 @@ exports.googleCallback = (req, res) => {
     // This user is the one we found or created in our passport.js config.
     const user = req.user;
 
+    // Handle case where an existing but non-active user tries to sign in via Google
+    if (user.status !== 'Active') {
+        // Redirect with a status query parameter to show a message on the login page
+        return res.redirect(`${process.env.FRONTEND_URL}/index.html?status=${user.status.toLowerCase()}`);
+    }
+
     const payload = { user: { id: user._id, name: user.name, role: user.role, office: user.office, email: user.email } };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
@@ -306,7 +312,7 @@ exports.googleCallback = (req, res) => {
     });
 
     // Redirect the user back to the frontend dashboard.
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard.html`);
+    res.redirect(`${process.env.FRONTEND_URL}/app.html`);
 };
 
 /**
