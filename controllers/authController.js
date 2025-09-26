@@ -315,7 +315,7 @@ exports.googleCallback = (req, res) => {
     });
 
     // Redirect the user back to the frontend dashboard.
-    res.redirect(`${process.env.FRONTEND_URL}/app.html`);
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard.html`);
 };
 
 /**
