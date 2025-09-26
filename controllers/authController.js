@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const SibApiV3Sdk = require('@sendinblue/client'); // Brevo SDK
+const { sendEmail } = require('../utils/emailService');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -11,6 +12,10 @@ exports.registerUser = async (req, res) => {
         const { employeeId, employmentType, name, role, password, office, email } = req.body;
         if (!employeeId || !employmentType || !name || !role || !password || !office || !email) {
             return res.status(400).json({ message: 'All fields are required.' });
+        }
+        // Ensure role is not an admin role during self-registration
+        if (['ICTO Staff', 'ICTO Head'].includes(role)) {
+            return res.status(400).json({ message: 'Cannot self-register as an administrator.' });
         }
         let existingUser = await User.findOne({ employeeId });
         if (existingUser) return res.status(400).json({ message: 'Employee ID already registered.' });
@@ -21,7 +26,16 @@ exports.registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = new User({ employeeId, employmentType, name, role, office, email, password: hashedPassword });
+        const newUser = new User({
+            employeeId,
+            employmentType,
+            name,
+            role,
+            office,
+            email,
+            password: hashedPassword,
+            status: 'Pending' // Explicitly set status to Pending
+        });
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully!' });
     } catch (error) {
@@ -35,6 +49,11 @@ exports.loginUser = async (req, res) => {
         if (!employeeId || !password) return res.status(400).json({ message: 'Employee ID and password are required.' });
         
         const user = await User.findOne({ employeeId });
+
+        // Deny login for non-active users
+        if (user && user.status !== 'Active') {
+            return res.status(403).json({ message: `Your account is not active. Current status: ${user.status}. Please contact an administrator.` });
+        }
         // If the user doesn't exist OR if they exist but don't have a password
         // (i.e., they are a Google-only user), treat it as invalid credentials.
         // This prevents the server from crashing on bcrypt.compare.
@@ -109,32 +128,20 @@ exports.forgotPassword = async (req, res) => {
         `;
 
         try {
-            // Configure API key authorization: apiKey
-            const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-            const apiKey = apiInstance.authentications['apiKey'];
-            apiKey.apiKey = process.env.BREVO_API_KEY;
-            const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-            sendSmtpEmail.subject = 'Password Reset Request';
-            sendSmtpEmail.htmlContent = htmlContent;
-            sendSmtpEmail.textContent = textContent; // Provide a plain text fallback
-            sendSmtpEmail.sender = { name: 'LGU Employee Portal', email: process.env.BREVO_FROM_EMAIL };
-            sendSmtpEmail.to = [{ email: user.email }];
-
-            // Await the promise from the Brevo API
-            await apiInstance.sendTransacEmail(sendSmtpEmail);
+            await sendEmail({
+                to: user.email,
+                subject: 'Password Reset Request',
+                htmlContent,
+                textContent
+            });
 
             res.status(200).json({ message: 'A password reset link has been sent to your email.' });
 
         } catch (err) {
-            if (err.body) {
-                // Brevo puts detailed errors in err.body
-                console.error('Brevo Error Body:', err.body);
-            }
-            // Clear the token on failure
-            await User.updateOne({ _id: user._id }, {
-                $set: { passwordResetToken: undefined, passwordResetExpires: undefined }
-            });
-            
+            // The email service now handles logging. We just need to clear the token.
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save({ validateBeforeSave: false }); // Save without running validators
             return res.status(500).json({ message: 'Error sending email. Please try again later.' });
         }
 

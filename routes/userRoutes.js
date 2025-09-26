@@ -17,6 +17,12 @@ router.get('/offices', getGsoOffices);
 router.put('/me', authMiddleware, updateUserProfile);
 
 router.get('/', authMiddleware, getAllUsers);
+
+// @route   PATCH /api/users/:id/status
+// @desc    Approve or reject a pending user registration
+// @access  Private (ICTO Head)
+router.patch('/:id/status', authMiddleware, require('../controllers/userController').updateUserStatus);
+
 router.patch('/:id', authMiddleware, updateUser);
 router.delete('/:id', authMiddleware, deleteUser);
 

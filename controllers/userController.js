@@ -1,8 +1,12 @@
 const User = require('../models/User');
 const SibApiV3Sdk = require('@sendinblue/client');
+const { sendEmail } = require('../utils/emailService'); // We will create this utility
 
 exports.getAllUsers = async (req, res) => {
-    if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
+    // Allow any user with 'ICTO' in their role to access this
+    if (!req.user.role || !req.user.role.includes('ICTO')) {
+        return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
+    }
     try {
         const { search, status } = req.query;
         let query = {};
@@ -41,8 +45,8 @@ exports.getAllUsers = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     // ... (logic for updating a user's details)
-    if (req.user.role !== 'ICTO Head') {
-        return res.status(403).json({ message: 'Forbidden: Access is restricted to administrators.' });
+    if (!req.user.role || !req.user.role.includes('ICTO')) {
+        return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
     }
     try {
         const { name, role, office } = req.body;
@@ -74,7 +78,9 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-     if (req.user.role !== 'ICTO Head') return res.status(403).json({ message: 'Forbidden' });
+     if (!req.user.role || !req.user.role.includes('ICTO')) {
+        return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
+    }
     try {
         if (req.user.id === req.params.id) return res.status(400).json({ message: 'Cannot delete your own administrator account.' });
         const deletedUser = await User.findByIdAndDelete(req.params.id);
@@ -173,5 +179,80 @@ exports.getGsoOffices = async (req, res) => {
     } catch (error) {
         console.error('Error proxying request to GSO for offices:', error);
         res.status(502).json({ message: 'Could not retrieve office list from the GSO system.' });
+    }
+};
+
+/**
+ * @desc    Approve or reject a pending user registration
+ * @route   PATCH /api/users/:id/status
+ * @access  Private (ICTO Head)
+ */
+exports.updateUserStatus = async (req, res) => {
+    if (!req.user.role || !req.user.role.includes('ICTO')) {
+        return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
+    }
+
+    try {
+        const { status } = req.body; // Expecting 'Active' or 'Rejected'
+        const userId = req.params.id;
+
+        if (!['Active', 'Rejected'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status provided.' });
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (user.status !== 'Pending') {
+            return res.status(400).json({ message: `User is not pending approval. Current status: ${user.status}` });
+        }
+
+        if (status === 'Active') {
+            user.status = 'Active';
+            await user.save();
+
+            // Send approval email
+            const portalLoginUrl = `${process.env.FRONTEND_URL}/index.html`;
+            await sendEmail({
+                to: user.email,
+                subject: 'Your LGU Employee Portal Account is Approved!',
+                htmlContent: `
+                    <p>Hello ${user.name},</p>
+                    <p>Congratulations! Your account for the LGU Daet Employee Portal has been approved.</p>
+                    <p>You can now log in using your credentials by clicking the link below:</p>
+                    <p><a href="${portalLoginUrl}" style="font-family: sans-serif; font-size: 14px; font-weight: bold; text-decoration: none; color: #ffffff; background-color: #0ea5e9; border: 15px solid #0ea5e9; border-radius: 3px; display: inline-block;">Login to Portal</a></p>
+                    <p>Thank you,<br>The LGU Employee Portal Team</p>
+                `,
+                textContent: `Hello ${user.name},\n\nCongratulations! Your account for the LGU Daet Employee Portal has been approved. You can now log in at: ${portalLoginUrl}\n\nThank you,\nThe LGU Employee Portal Team`
+            });
+
+            res.status(200).json({ message: `User ${user.name} has been approved.` });
+
+        } else { // status === 'Rejected'
+            const userEmail = user.email;
+            const userName = user.name;
+            await User.findByIdAndDelete(userId);
+
+            // Send rejection email
+            await sendEmail({
+                to: userEmail,
+                subject: 'Update on Your LGU Employee Portal Registration',
+                htmlContent: `
+                    <p>Hello ${userName},</p>
+                    <p>We are writing to inform you that your registration for the LGU Daet Employee Portal could not be approved at this time.</p>
+                    <p>If you believe this is an error or have any questions, please contact the ICTO department directly.</p>
+                    <p>Thank you,<br>The LGU Employee Portal Team</p>
+                `,
+                textContent: `Hello ${userName},\n\nWe are writing to inform you that your registration for the LGU Daet Employee Portal could not be approved at this time. If you believe this is an error or have any questions, please contact the ICTO department directly.\n\nThank you,\nThe LGU Employee Portal Team`
+            });
+
+            res.status(200).json({ message: `User registration for ${userName} has been rejected and the record has been deleted.` });
+        }
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        res.status(500).json({ message: 'An error occurred while updating the user status.' });
     }
 };
