@@ -39,7 +39,7 @@ function renderSidebar(currentUser) {
     sidebarContainer.innerHTML = `
         <!-- Mobile Overlay -->
         <div id="overlay" class="fixed inset-0 z-30 hidden bg-black bg-opacity-50 lg:hidden"></div>
-        <!-- Sidebar (Sticky on large screens) -->
+        <!-- Sidebar -->
         <aside id="sidebar" class="flex w-64 flex-col bg-slate-900 text-white transition-transform duration-300 ease-in-out fixed inset-y-0 left-0 z-40 -translate-x-full lg:fixed lg:translate-x-0 lg:h-screen">
             <div class="flex h-32 flex-col items-center justify-center border-b border-slate-700 px-4">
                 <img src="images/LGU-DAET LOGO.jpg" alt="LGU Logo" class="h-16 w-16 rounded-full object-contain">
