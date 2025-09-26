@@ -149,13 +149,23 @@ async function initializeUsersPage() {
     function openEditModal(user) {
         const editModal = document.getElementById('edit-user-modal');
         const editUserName = document.getElementById('edit-user-name');
+        const editUserEmployeeId = document.getElementById('edit-user-employeeId');
         const editUserOffice = document.getElementById('edit-user-office');
         const editRoleSelect = document.getElementById('edit-role-select');
 
         selectedUser = user;
-        editUserName.value = user.name; // FIX: Use .value for input fields
+        editUserName.value = user.name;
+        editUserEmployeeId.value = user.employeeId;
         editUserOffice.value = user.office; // New
         editRoleSelect.value = user.role;
+
+        // Make Employee ID read-only if it's not a Google placeholder
+        if (user.employeeId && !user.employeeId.startsWith('google-')) {
+            editUserEmployeeId.readOnly = true;
+        } else {
+            editUserEmployeeId.readOnly = false;
+        }
+
         editModal.showModal();
     }
 
@@ -263,6 +273,7 @@ function setupUserPageEventListeners() {
 
         const updatedData = {
             name: document.getElementById('edit-user-name').value,
+            employeeId: document.getElementById('edit-user-employeeId').value,
             office: document.getElementById('edit-user-office').value,
             role: document.getElementById('edit-role-select').value
         };

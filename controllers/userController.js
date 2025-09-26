@@ -40,11 +40,19 @@ exports.updateUser = async (req, res) => {
         return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
     }
     try {
-        const { name, role, office } = req.body;
+        const { name, role, office, employeeId } = req.body;
         const updateData = {};
 
         // Build an object with only the fields that were provided
         if (name) updateData.name = name;
+        if (employeeId) {
+            // Check if the new employeeId is already taken by another user
+            const existingUser = await User.findOne({ employeeId: employeeId });
+            if (existingUser && existingUser._id.toString() !== req.params.id) {
+                return res.status(400).json({ message: 'This Employee ID is already in use by another account.' });
+            }
+            updateData.employeeId = employeeId;
+        }
         if (role) updateData.role = role;
         if (office) updateData.office = office;
 

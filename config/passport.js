@@ -40,6 +40,8 @@ passport.use(
                         employmentType: 'Permanent',
                         role: 'Employee',
                         office: 'Unassigned',
+                        // Use a unique placeholder for employeeId to avoid unique index conflicts on null values.
+                        employeeId: `google-${profile.id}`,
                         // Users signing up via Google are automatically considered active
                         status: 'Active'
                     });
