@@ -38,7 +38,7 @@ function showToast(message, type = 'success') {
     }, 5000);
 }
 
-const API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
+window.API_BASE_URL = 'https://lgu-helpdesk-copy.onrender.com';
 const PORTAL_LOGIN_URL = 'https://lgu-employee-portal.netlify.app/index.html';
 
 // --- Global State ---

@@ -46,7 +46,10 @@ async function initializeUsersPage() {
         try {
             const url = new URL(`${window.API_BASE_URL}/api/users`);
             url.searchParams.append('status', 'Pending');
-            const response = await fetchWithAuth(url.toString());
+            const response = await fetch(url.toString(), {
+                credentials: 'include' // Use cookie for authentication
+            });
+            if (!response.ok) throw new Error((await response.json()).message || 'Failed to fetch pending count');
             const pendingUsers = await response.json();
             const count = pendingUsers.length;
             const badge = document.getElementById('pending-count-badge');
@@ -255,7 +258,8 @@ function setupUserPageEventListeners() {
         };
 
         try {
-            const response = await fetchWithAuth(`/api/users/${selectedUser._id}`, {
+            // Use window.API_BASE_URL to construct the full URL
+            const response = await fetch(`${window.API_BASE_URL}/api/users/${selectedUser._id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedData)
@@ -290,7 +294,7 @@ function setupUserPageEventListeners() {
             `;
 
         try {
-            const response = await fetchWithAuth(`/api/users/${selectedUser._id}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/users/${selectedUser._id}`, {
                 method: 'DELETE'
             });
             const result = await response.json();
@@ -310,7 +314,7 @@ function setupUserPageEventListeners() {
     // --- NEW: Handle Approve/Reject Actions ---
     const handleUserStatusAction = async (userId, status) => {
         try {
-            const response = await fetchWithAuth(`/api/users/${userId}/status`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/users/${userId}/status`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: status === 'approve' ? 'Active' : 'Rejected' }),
