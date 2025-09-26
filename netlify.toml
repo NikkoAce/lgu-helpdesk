@@ -1,0 +1,16 @@
+# Netlify Build Configuration
+# This file tells Netlify how to build and deploy your site.
+
+[build]
+  # This command will be run to build your site.
+  # It will install your dependencies and then run your CSS build script.
+  command = "npm run build:css"
+
+  # This is the directory that contains your final website files.
+  # Netlify will deploy the contents of this folder.
+  publish = "public"
+
+[build.environment]
+  # It's good practice to specify the Node.js version.
+  # This should match the version you use for local development.
+  NODE_VERSION = "18"
