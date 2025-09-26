@@ -1,4 +1,4 @@
-const User = require('./user.model.js');
+const User = require('..auth/user.model.js');
 const { sendEmail } = require('../../services/email.service.js');
 
 exports.getAllUsers = async (req, res) => {
