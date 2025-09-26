@@ -2,8 +2,7 @@ const User = require('./user.model.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const emailService = require('../../services/email.service.js');
-
+const { sendEmail } = require('../../services/email.service.js');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -48,7 +47,7 @@ exports.registerUser = async (req, res) => {
             const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
             if (adminEmail) {
                 const userManagementUrl = `${process.env.FRONTEND_URL}/users.html`;
-                await sendEmail({
+                await emailService.sendEmail({
                     to: adminEmail,
                     subject: 'New User Registration Awaiting Approval',
                     htmlContent: `
@@ -165,7 +164,7 @@ exports.forgotPassword = async (req, res) => {
         `;
 
         try {
-            await sendEmail({
+            await emailService.sendEmail({
                 to: user.email,
                 subject: 'Password Reset Request',
                 htmlContent,
