@@ -1,3 +1,5 @@
+let ticketId = null; // Make ticketId accessible to all functions in this script
+
 async function initializeTicketDetailsPage() {
     // Now that we are authenticated, fetch the ticket details
     fetchTicketDetails();
@@ -6,7 +8,8 @@ async function initializeTicketDetailsPage() {
 async function fetchTicketDetails() {
     const loadingMessage = document.getElementById('loading-message');
     const urlParams = new URLSearchParams(window.location.search);
-    const ticketId = urlParams.get('id');
+    // Assign the ID from the URL to our script-level variable
+    ticketId = urlParams.get('id');
 
     if (!ticketId) { loadingMessage.textContent = 'Error: No ticket ID provided.'; return; }
 
@@ -179,7 +182,7 @@ async function fetchTicketDetails() {
             `;
 
             try {
-                const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}/comments`, {
+                const response = await fetch(`${window.API_BASE_URL}/api/tickets/${ticketId}/comments`, {
                     method: 'POST',
                     body: formData,
                     credentials: 'include'
@@ -226,7 +229,7 @@ async function fetchTicketDetails() {
             `;
 
             try {
-                const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}`, {
+                const response = await fetch(`${window.API_BASE_URL}/api/tickets/${ticketId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus }),
@@ -261,7 +264,7 @@ async function fetchTicketDetails() {
                 }
 
                 try {
-                    const response = await fetch(`https://lgu-helpdesk-copy.onrender.com/api/tickets/${ticketId}/comments/${commentId}/attachment`, {
+                    const response = await fetch(`${window.API_BASE_URL}/api/tickets/${ticketId}/comments/${commentId}/attachment`, {
                         method: 'DELETE',
                         credentials: 'include'
                     });
