@@ -1,12 +1,6 @@
 async function initializeTicketDetailsPage() {
-    try {
-        // Now that we are authenticated, fetch the ticket details
-        fetchTicketDetails();
-
-    } catch (error) {
-        console.error("Authentication check failed:", error);
-        window.location.href = PORTAL_LOGIN_URL;
-    }
+    // Now that we are authenticated, fetch the ticket details
+    fetchTicketDetails();
 }
 
 async function fetchTicketDetails() {
@@ -284,5 +278,3 @@ async function fetchTicketDetails() {
             });
         });
     }
-
-document.addEventListener('DOMContentLoaded', initializeTicketDetailsPage);

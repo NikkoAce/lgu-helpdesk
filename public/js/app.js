@@ -98,6 +98,9 @@ async function initializeApp() {
             case 'new-ticket':
                 if (typeof initializeNewTicketPage === 'function') initializeNewTicketPage();
                 break;
+            case 'ticket-details':
+                if (typeof initializeTicketDetailsPage === 'function') initializeTicketDetailsPage();
+                break;
         }
 
         // --- NEW: Resolve the initialization promise ---
