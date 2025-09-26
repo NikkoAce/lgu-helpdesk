@@ -3,7 +3,7 @@ async function initializeAnalyticsPage() {
         await appInitialization; // Wait for app.js to set currentUser
         // Page protection: Only allow ICTO Head to see this page
         if (!currentUser || !currentUser.role.includes('ICTO')) {
-            alert('Access Denied: This page is for ICTO staff only.');
+            alert('Access Denied: This page is for ICTO personnel only.');
             window.location.href = 'app.html';
             return;
         }
