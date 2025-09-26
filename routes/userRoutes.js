@@ -18,12 +18,10 @@ router.put('/me', authMiddleware, updateUserProfile);
 
 router.get('/', authMiddleware, getAllUsers);
 
-// @route   PATCH /api/users/:id/status
-// @desc    Approve or reject a pending user registration
-// @access  Private (ICTO Head)
-router.patch('/:id/status', authMiddleware, require('../controllers/userController').updateUserStatus);
-
-router.patch('/:id', authMiddleware, updateUser);
-router.delete('/:id', authMiddleware, deleteUser);
+// IMPORTANT: More specific routes must come before general routes with parameters.
+// '/:id/status' must be before '/:id'.
+router.patch('/:id/status', authMiddleware, require('../controllers/userController').updateUserStatus); // Approve/Reject
+router.patch('/:id', authMiddleware, updateUser); // Edit
+router.delete('/:id', authMiddleware, deleteUser); // Delete
 
 module.exports = router;
