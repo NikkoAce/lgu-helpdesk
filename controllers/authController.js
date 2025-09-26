@@ -18,7 +18,12 @@ exports.registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Cannot self-register as an administrator.' });
         }
         let existingUser = await User.findOne({ employeeId });
-        if (existingUser) return res.status(400).json({ message: 'Employee ID already registered.' });
+        if (existingUser) {
+            // If user exists, check their status.
+            if (existingUser.status === 'Active') return res.status(400).json({ message: 'This Employee ID is already registered and active.' });
+            if (existingUser.status === 'Pending') return res.status(400).json({ message: 'This Employee ID has a pending registration. Please wait for approval.' });
+            // If status is 'Rejected' or something else, we can allow re-registration by deleting the old record.
+        }
         
         existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ message: 'Email address already registered.' });
