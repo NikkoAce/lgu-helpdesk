@@ -1,12 +1,6 @@
 async function initializeNewTicketPage() {
-    try {
-        // If authenticated, set up the form event listeners.
-        setupNewTicketForm();
-
-    } catch (error) {
-        console.error("Authentication check failed:", error);
-        window.location.href = PORTAL_LOGIN_URL;
-    }
+    // If authenticated, set up the form event listeners.
+    setupNewTicketForm();
 }
 
 function setupNewTicketForm() {
@@ -71,5 +65,3 @@ function setupNewTicketForm() {
         }
     });
 };
-
-document.addEventListener('DOMContentLoaded', initializeNewTicketPage);
