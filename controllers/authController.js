@@ -56,8 +56,11 @@ exports.loginUser = async (req, res) => {
         const user = await User.findOne({ employeeId });
 
         // Deny login for non-active users
-        if (user && user.status !== 'Active') {
-            return res.status(403).json({ message: `Your account is not active. Current status: ${user.status}. Please contact an administrator.` });
+        // This check allows older accounts (with no status field) to log in,
+        // while explicitly blocking 'Pending' or 'Rejected' accounts.
+        if (user && (user.status === 'Pending' || user.status === 'Rejected')) {
+            const reason = user.status === 'Pending' ? 'awaiting administrator approval' : 'rejected';
+            return res.status(403).json({ message: `Your account is currently ${reason}. Please contact an administrator if you believe this is an error.` });
         }
         // If the user doesn't exist OR if they exist but don't have a password
         // (i.e., they are a Google-only user), treat it as invalid credentials.
