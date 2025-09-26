@@ -30,6 +30,8 @@ async function initializeUsersPage() {
             if (searchTerm) {
                 url.searchParams.append('status', status); // Pass status along with search
                 url.searchParams.append('search', searchTerm.trim());
+            } else {
+                url.searchParams.append('status', status);
             }
 
             const response = await fetch(url, {
