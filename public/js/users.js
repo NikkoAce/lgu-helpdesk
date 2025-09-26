@@ -1,21 +1,16 @@
 async function initializeUsersPage() {
-    try {
-        await window.appInitialization; // Wait for app.js to set currentUser
-        // Page protection: Only allow ICTO personnel to see this page
-        if (!currentUser || !currentUser.role.includes('ICTO')) {
-            alert('Access Denied: This page is for ICTO personnel only.');
-            window.location.href = 'app.html';
-            return;
-        }
-
-        // If authorized, set up the page and fetch initial data
-        setupUserPageEventListeners(); // Rename to avoid conflict
-        fetchAndRenderUsers('Active'); // Default to active users
-        fetchPendingCount(); // Fetch the count for the badge
-    } catch (error) {
-        console.error("Initialization check failed:", error);
-        window.location.href = PORTAL_LOGIN_URL;
+    // Page protection: Only allow ICTO personnel to see this page
+    // This now runs *after* app.js has populated currentUser.
+    if (!currentUser || !currentUser.role.includes('ICTO')) {
+        alert('Access Denied: This page is for ICTO personnel only.');
+        window.location.href = 'app.html';
+        return;
     }
+
+    // If authorized, set up the page and fetch initial data
+    setupUserPageEventListeners(); // Rename to avoid conflict
+    fetchAndRenderUsers('Active'); // Default to active users
+    fetchPendingCount(); // Fetch the count for the badge
 }
 
     // A simple cache to hold the fetched user data to avoid re-fetching
@@ -357,5 +352,3 @@ function setupUserPageEventListeners() {
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeModal);
     if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeModal);
 }
-
-document.addEventListener('DOMContentLoaded', initializeUsersPage);

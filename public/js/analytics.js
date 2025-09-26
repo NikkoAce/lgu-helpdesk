@@ -1,20 +1,12 @@
 async function initializeAnalyticsPage() {
-    try {
-        await appInitialization; // Wait for app.js to set currentUser
-        // Page protection: Only allow ICTO Head to see this page
-        if (!currentUser || !currentUser.role.includes('ICTO')) {
-            alert('Access Denied: This page is for ICTO personnel only.');
-            window.location.href = 'app.html';
-            return;
-        }
-
-        // If authorized, fetch the analytics data
-        fetchAndRenderAnalytics();
-
-    } catch (error) {
-        console.error("Authentication failed:", error);
-        window.location.href = PORTAL_LOGIN_URL;
+    // Page protection: Only allow ICTO personnel to see this page
+    if (!currentUser || !currentUser.role.includes('ICTO')) {
+        alert('Access Denied: This page is for ICTO personnel only.');
+        window.location.href = 'app.html';
+        return;
     }
+    // If authorized, fetch the analytics data
+    fetchAndRenderAnalytics();
 }
 
 async function fetchAndRenderAnalytics() {
@@ -117,5 +109,3 @@ async function fetchAndRenderAnalytics() {
             });
         }
     }
-
-document.addEventListener('DOMContentLoaded', initializeAnalyticsPage);

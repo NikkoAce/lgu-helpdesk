@@ -1,20 +1,13 @@
 async function initializeTicketsPage() {
-    try {
-        await appInitialization; // Wait for app.js to set currentUser
-        // Page Protection: Only allow ICTO roles to access this page
-        if (!currentUser || !currentUser.role.includes('ICTO')) {
-            alert('Access Denied: This page is for ICTO personnel only.');
-            window.location.href = 'app.html';
-            return;
-        }
-
-        // If authorized, set up the page and fetch initial data
-        setupTicketPageEventListeners(); // Rename to avoid conflict
-        fetchAndRenderTickets();
-    } catch (error) {
-        console.error("Authentication check failed:", error);
-        window.location.href = PORTAL_LOGIN_URL;
+    // Page Protection: Only allow ICTO roles to access this page
+    if (!currentUser || !currentUser.role.includes('ICTO')) {
+        alert('Access Denied: This page is for ICTO personnel only.');
+        window.location.href = 'app.html';
+        return;
     }
+    // If authorized, set up the page and fetch initial data
+    setupTicketPageEventListeners();
+    fetchAndRenderTickets();
 }
     let currentPage = 1;
     let totalPages = 1;
@@ -143,5 +136,3 @@ function setupTicketPageEventListeners() {
         });
     }
 }
-
-document.addEventListener('DOMContentLoaded', initializeTicketsPage);

@@ -78,12 +78,23 @@ async function initializeApp() {
         renderHeader(currentUser);
         setupLayoutEventListeners(); // Set up listeners for the newly rendered layout
 
-        // Only render dashboard-specific components if they exist on the current page
-        if (document.getElementById('dashboard-stats-container')) {
-            renderDashboardAnalytics();
-        }
-        if (document.getElementById('ticket-list-container')) {
-            renderTickets();
+        // --- NEW: Centralized Page Initialization ---
+        // After the main layout is ready, call the specific initializer for the current page.
+        // This ensures currentUser is available before any page-specific logic runs.
+        const pageId = document.body.dataset.pageId;
+        switch (pageId) {
+            case 'dashboard':
+                if (typeof initializeDashboardPage === 'function') initializeDashboardPage();
+                break;
+            case 'users':
+                if (typeof initializeUsersPage === 'function') initializeUsersPage();
+                break;
+            case 'analytics':
+                if (typeof initializeAnalyticsPage === 'function') initializeAnalyticsPage();
+                break;
+            case 'tickets':
+                if (typeof initializeTicketsPage === 'function') initializeTicketsPage();
+                break;
         }
 
         // --- NEW: Resolve the initialization promise ---
@@ -257,11 +268,22 @@ function setupEventListeners() {
 }
 
 // This function is now called from each page's specific JS file.
+/**
+ * Initializes the dashboard page components after the main app is ready.
+ */
+function initializeDashboardPage() {
+    renderDashboardAnalytics();
+    renderTickets();
+}
 
 // --- Main Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
-    setupEventListeners();
+    // Only run initializeApp if we are on a page that requires authentication.
+    // This prevents it from running on login/register pages.
+    if (document.body.dataset.requiresAuth === 'true') {
+        initializeApp();
+        setupEventListeners();
+    }
 });
 
 /**
