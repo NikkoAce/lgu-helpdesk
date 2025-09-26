@@ -8,6 +8,7 @@ passport.use(
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             // The callbackURL should be the full path on your server
+            accessType: 'offline', // This prompts the user for consent once, then makes the app visible in their Google Account settings.
             callbackURL: '/api/auth/google/callback',
             scope: ['profile', 'email'],
         },
