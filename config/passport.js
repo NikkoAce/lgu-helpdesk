@@ -39,11 +39,7 @@ passport.use(
                         // Set default values. These can be updated later in their profile.
                         employmentType: 'Permanent',
                         role: 'Employee',
-                        office: 'Unassigned',
-                        // Use a unique placeholder for employeeId to avoid unique index conflicts on null values.
-                        employeeId: `google-${profile.id}`,
-                        // Users signing up via Google are automatically considered active
-                        status: 'Active'
+                        status: 'Active' // Users signing up via Google are automatically considered active
                     });
                     return done(null, newUser);
                 }
