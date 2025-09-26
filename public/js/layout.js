@@ -73,26 +73,6 @@ function renderHeader(currentUser) {
 }
 
 /**
- * Renders a simple header for mobile view with a menu button.
- */
-function renderMobileHeader() {
-    const mobileHeaderContainer = document.getElementById('mobile-header-container');
-    if (!mobileHeaderContainer) return;
-
-    mobileHeaderContainer.innerHTML = `
-        <header class="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b bg-white px-4">
-            <div class="flex items-center">
-                <button id="mobile-menu-button" class="text-gray-500 focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-            </div>
-            <span class="text-lg font-bold text-gray-800">LGU-Daet IT Helpdesk</span>
-        </header>
-    `;
-}
-/**
  * Sets up event listeners for the main layout components (sidebar, header).
  */
 function setupLayoutEventListeners() {
@@ -115,18 +95,7 @@ function setupLayoutEventListeners() {
 
     // Mobile Responsiveness for closing the sidebar
     document.addEventListener('click', (event) => {
-        // Handle clicking the mobile menu button to OPEN the sidebar
-        const menuButton = event.target.closest('#mobile-menu-button');
-        if (menuButton) {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            if (sidebar && overlay) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            }
-        }
-
-        // Handle clicking the overlay to CLOSE the menu
+        // Also handle clicking the overlay to close the menu
         if (event.target.id === 'overlay') {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');

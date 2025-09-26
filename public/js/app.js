@@ -76,7 +76,6 @@ async function initializeApp() {
         // --- If authenticated, render all page components ---
         renderSidebar(currentUser);
         renderHeader(currentUser);
-        renderMobileHeader(); // NEW: Render the mobile-specific header
         setupLayoutEventListeners(); // Set up listeners for the newly rendered layout
 
         // Only render dashboard-specific components if they exist on the current page
