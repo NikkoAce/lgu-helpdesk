@@ -66,10 +66,19 @@ function renderSidebar(currentUser) {
 function renderHeader(currentUser) {
     const headerContainer = document.getElementById('header-container');
     if (!headerContainer || !currentUser) return;
-    
-    // The header is no longer needed with the new design.
-    // We remove the container to keep the DOM clean.
-    headerContainer.remove();
+
+    // This header will only contain the mobile menu button.
+    // It will be hidden on large screens where the sidebar is always visible.
+    headerContainer.innerHTML = `
+        <header class="lg:hidden bg-slate-900 text-white p-4 flex items-center justify-between shadow-md">
+            <span class="text-lg font-bold">LGU-Daet IT Helpdesk</span>
+            <button id="mobile-menu-button" class="btn btn-square btn-ghost">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </header>
+    `;
 }
 
 /**
@@ -89,6 +98,19 @@ function setupLayoutEventListeners() {
                 console.error('Logout request failed:', error);
             } finally {
                 window.location.href = PORTAL_LOGIN_URL;
+            }
+        }
+    });
+
+    // --- NEW: Mobile Menu Button to OPEN the sidebar ---
+    document.addEventListener('click', (event) => {
+        // Use .closest() to handle clicks on the button or its SVG icon
+        if (event.target.closest('#mobile-menu-button')) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
             }
         }
     });
