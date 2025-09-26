@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const passport = require('passport'); // Import passport
 const session = require('express-session'); // Import express-session
 const MongoStore = require('connect-mongo'); // Import connect-mongo
+const path = require('path'); // Import the path module
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,7 +62,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-require('./src/config/passport.js'); // Initialize passport configuration
+require(path.join(__dirname, 'src', 'config', 'passport.js')); // Use absolute path
 
 // --- Use morgan for detailed request logging ---
 app.use(morgan('dev'));
@@ -76,10 +77,10 @@ mongoose.connect(MONGO_URI, { readPreference: 'primary' })
 
 
 // --- API ROUTES ---
-app.use('/api/auth', require('./src/features/auth/auth.routes.js'));
-app.use('/api/tickets', require('./src/features/tickets/ticket.routes.js'));
-app.use('/api/users', require('./src/features/users/user.routes.js'));
-app.use('/api/analytics', require('./src/features/analytics/analytics.routes.js')); 
+app.use('/api/auth', require(path.join(__dirname, 'src', 'features', 'auth', 'auth.routes.js')));
+app.use('/api/tickets', require(path.join(__dirname, 'src', 'features', 'tickets', 'ticket.routes.js')));
+app.use('/api/users', require(path.join(__dirname, 'src', 'features', 'users', 'user.routes.js')));
+app.use('/api/analytics', require(path.join(__dirname, 'src', 'features', 'analytics', 'analytics.routes.js')));
 
 
 
