@@ -1,6 +1,11 @@
-require('module-alias/register'); // Must be the first line
-
 require('dotenv').config();
+const path = require('path'); // Import the path module
+
+// --- Robust Module Aliasing ---
+// This must come before any other require statements that use the alias.
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('@', path.join(__dirname)); // The '@' alias now points to the 'src' directory.
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -9,7 +14,6 @@ const morgan = require('morgan');
 const passport = require('passport'); // Import passport
 const session = require('express-session'); // Import express-session
 const MongoStore = require('connect-mongo'); // Import connect-mongo
-const path = require('path'); // Import the path module
 
 const app = express();
 const PORT = process.env.PORT || 3000;
