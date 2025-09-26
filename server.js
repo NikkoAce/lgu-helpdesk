@@ -1,3 +1,5 @@
+require('module-alias/register'); // Must be the first line
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
