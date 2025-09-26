@@ -12,6 +12,9 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@sendinblue/client": "^3.3.1",
     "app-module-path": "^2.2.0",
