@@ -4,7 +4,7 @@
 [build]
   # This command will be run to build your site.
   # It will install your dependencies and then run your CSS build script.
-  command = "npm run build"
+  command = "npm install && npm run build"
 
   # This is the directory that contains your final website files.
   # Netlify will deploy the contents of this folder.
