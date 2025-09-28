@@ -47,6 +47,12 @@ function renderSidebar(currentUser) {
             </div>
             <nav class="flex-1 space-y-2 p-4">${navHTML}</nav>
             
+            <!-- Back to Portal Button -->
+            <div class="p-4 border-t border-slate-700">
+                <a href="${PORTAL_LOGIN_URL.replace('index.html', 'dashboard.html')}" class="flex items-center rounded-md px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white">
+                    ${getIcon('back')}<span>Back to Portal</span>
+                </a>
+            </div>
             <!-- Sidebar Footer with User Info -->
             <div class="border-t border-slate-700 p-4">
                 <div class="text-left">
