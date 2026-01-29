@@ -47,7 +47,7 @@ exports.registerUser = async (req, res) => {
             const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
             if (adminEmail) {
                 const userManagementUrl = `${process.env.FRONTEND_URL}/users.html`;
-                await emailService.sendEmail({
+                await sendEmail({
                     to: adminEmail,
                     subject: 'New User Registration Awaiting Approval',
                     htmlContent: `
@@ -164,7 +164,7 @@ exports.forgotPassword = async (req, res) => {
         `;
 
         try {
-            await emailService.sendEmail({
+            await sendEmail({
                 to: user.email,
                 subject: 'Password Reset Request',
                 htmlContent,
