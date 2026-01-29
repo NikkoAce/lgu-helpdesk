@@ -174,10 +174,13 @@ exports.forgotPassword = async (req, res) => {
             res.status(200).json({ message: 'A password reset link has been sent to your email.' });
 
         } catch (err) {
-            // The email service now handles logging. We just need to clear the token.
-            user.passwordResetToken = undefined;
-            user.passwordResetExpires = undefined;
-            await user.save({ validateBeforeSave: false }); // Save without running validators
+            // If sending the email fails, we should revert the token in the database
+            // to allow the user to try again.
+            await User.updateOne({ _id: user._id }, {
+                $unset: { passwordResetToken: 1, passwordResetExpires: 1 }
+            });
+            // Also, log the actual email error for easier debugging.
+            console.error('Failed to send password reset email:', err);
             return res.status(500).json({ message: 'Error sending email. Please try again later.' });
         }
 
