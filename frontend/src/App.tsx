@@ -1,6 +1,6 @@
 // FILE: d:/Programming/_ITHELPDESK/frontend/src/App.tsx
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { fetchWithAuth } from './utils/api';
 import type { HelpdeskUser } from './utils/api';
 
@@ -32,6 +32,42 @@ interface NavLinkItem {
   href: string;
   icon: React.ReactNode;
 }
+
+// Redirects legacy HTML file requests to matching React Router endpoints
+const LegacyRedirect: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const pathname = location.pathname;
+    if (pathname.endsWith('/app.html')) {
+      navigate('/dashboard', { replace: true });
+    } else if (pathname.endsWith('/new-ticket.html')) {
+      navigate('/new-ticket', { replace: true });
+    } else if (pathname.endsWith('/tickets.html')) {
+      navigate('/tickets', { replace: true });
+    } else if (pathname.endsWith('/analytics.html')) {
+      navigate('/analytics', { replace: true });
+    } else if (pathname.endsWith('/users.html')) {
+      navigate('/users', { replace: true });
+    } else if (pathname.endsWith('/ticket-details.html')) {
+      const id = searchParams.get('id');
+      if (id) {
+        navigate(`/ticket/${id}`, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [location, searchParams, navigate]);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] bg-base-200">
+      <span className="loading loading-spinner loading-md text-primary"></span>
+      <p className="text-xs text-base-content/50 mt-2 font-heading">Redirecting legacy workspace link...</p>
+    </div>
+  );
+};
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -193,6 +229,14 @@ const AppContent: React.FC = () => {
           <Route path="/new-ticket" element={<NewTicket />} />
           <Route path="/ticket/:id" element={<TicketDetails currentUser={currentUser} />} />
           
+          {/* Legacy compatibility redirect routes */}
+          <Route path="/app.html" element={<LegacyRedirect />} />
+          <Route path="/new-ticket.html" element={<LegacyRedirect />} />
+          <Route path="/tickets.html" element={<LegacyRedirect />} />
+          <Route path="/analytics.html" element={<LegacyRedirect />} />
+          <Route path="/users.html" element={<LegacyRedirect />} />
+          <Route path="/ticket-details.html" element={<LegacyRedirect />} />
+          
           {/* Protected admin/icto routes */}
           {isIcto ? (
             <>
@@ -217,3 +261,4 @@ export default function App() {
     </Router>
   );
 }
+
