@@ -1,15 +1,24 @@
-const Ticket = require('../tickets/ticket.model.js');
+import { Response } from 'express';
+import Ticket from '../tickets/ticket.model';
+import { AuthenticatedRequest } from '../../middleware/auth.middleware';
 
-exports.getDashboardSummary = async (req, res) => {
+/**
+ * @desc    Get dashboard summary counters scoped by role visibility
+ * @route   GET /api/analytics/dashboard-summary
+ */
+export const getDashboardSummary = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
         const { role, name, office } = req.user;
-        const queryFilter = {};
+        const queryFilter: any = {};
 
         if (role.includes('ICTO')) {
-            // ICTO sees system-wide stats on their dashboard too
+            // ICTO sees global statistics
         } else if (role === 'Department Head') {
             queryFilter.requesterOffice = office;
-        } else { // Regular Employee
+        } else {
             queryFilter.requesterName = name;
         }
 
@@ -21,14 +30,17 @@ exports.getDashboardSummary = async (req, res) => {
         ]);
 
         res.status(200).json({ total, new: newTickets, inProgress, resolved });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: 'Error fetching dashboard summary', error: error.message });
     }
 };
 
-exports.getMainAnalytics = async (req, res) => {
-    // Allow any user with 'ICTO' in their role to access analytics
-    if (!req.user.role || !req.user.role.includes('ICTO')) {
+/**
+ * @desc    Get global analytics data (ICTO personnel only)
+ * @route   GET /api/analytics/summary
+ */
+export const getMainAnalytics = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
+    if (!req.user || !req.user.role || !req.user.role.includes('ICTO')) {
         return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
     }
     try {
@@ -39,8 +51,14 @@ exports.getMainAnalytics = async (req, res) => {
             Ticket.countDocuments({ status: 'Resolved' }),
             Ticket.countDocuments({ status: 'Closed' })
         ]);
-        res.status(200).json({ totalTickets, new: newTickets, inProgress: inProgressTickets, resolved: resolvedTickets, closed: closedTickets });
-    } catch (error) {
+        res.status(200).json({
+            totalTickets,
+            new: newTickets,
+            inProgress: inProgressTickets,
+            resolved: resolvedTickets,
+            closed: closedTickets
+        });
+    } catch (error: any) {
         res.status(500).json({ message: 'Error fetching analytics summary', error: error.message });
     }
 };
