@@ -313,7 +313,7 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
         res.redirect(redirectUrl);
     } catch (error: any) {
         console.error('SSO Redirect Error:', error);
-        res.status(500).send('An error occurred during the single sign-on process.');
+        res.status(500).send(`An error occurred during the single sign-on process. Error: ${error.message}`);
     }
 };
 
