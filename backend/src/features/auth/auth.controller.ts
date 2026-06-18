@@ -314,11 +314,7 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
         res.redirect(redirectUrl);
     } catch (error: any) {
         console.error('SSO Redirect Error:', error);
-        const pk = process.env.SSO_PRIVATE_KEY || 'undefined';
-        res.status(500).send(`An error occurred during the single sign-on process. Error: ${error.message}
-Raw Len: ${pk.length}, Clean Len: ${cleanPrivateKey.length}
-Raw Start: ${pk.substring(0, 35)}... Raw End: ...${pk.substring(pk.length - 35)}
-Clean Start: ${cleanPrivateKey.substring(0, 35)}... Clean End: ...${cleanPrivateKey.substring(cleanPrivateKey.length - 35)}`);
+        res.status(500).send('An error occurred during the single sign-on process.');
     }
 };
 
