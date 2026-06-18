@@ -1,7 +1,8 @@
 # Netlify Configuration File for IT Helpdesk SPA
 [build]
-  command = "npm --prefix frontend install && npm --prefix frontend run build"
-  publish = "frontend/dist"
+  base = "frontend"
+  command = "npm install && npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
