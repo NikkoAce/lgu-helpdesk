@@ -287,9 +287,15 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
             return res.status(500).send('SSO configuration error. Please contact an administrator.');
         }
 
+        // Clean quotes and handle escaped newlines
+        const cleanPrivateKey = privateKey
+            .trim()
+            .replace(/^['"]|['"]$/g, '')
+            .replace(/\\n/g, '\n');
+
         const ssoToken = jwt.sign(
             { user: userPayload },
-            privateKey.replace(/\\n/g, '\n'), // Handle key formats inside environment files
+            cleanPrivateKey,
             { algorithm: 'RS256', expiresIn: '2m' }
         );
 
