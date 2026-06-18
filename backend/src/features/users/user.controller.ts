@@ -228,7 +228,7 @@ export const updateUserStatus = async (req: AuthenticatedRequest, res: Response)
             await user.save();
 
             // Send approval email
-            const portalLoginUrl = `${process.env.FRONTEND_URL}/index.html`;
+            const portalLoginUrl = `${process.env.FRONTEND_URL}/login`;
             await sendEmail({
                 to: user.email,
                 subject: 'Your LGU Employee Portal Account is Approved!',

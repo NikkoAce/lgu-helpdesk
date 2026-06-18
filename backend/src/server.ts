@@ -12,6 +12,7 @@ import authRoutes from './features/auth/auth.routes';
 import ticketRoutes from './features/tickets/ticket.routes';
 import userRoutes from './features/users/user.routes';
 import analyticsRoutes from './features/analytics/analytics.routes';
+import internalRoutes from './features/internal/internal.routes';
 
 // Load passport configuration
 import './config/passport';
@@ -29,10 +30,15 @@ if (!MONGO_URI) {
 const allowedOrigins = [
     'https://lgu-employee-portal.netlify.app',
     'https://lgu-ithelpdesk.netlify.app',
+    'https://lgudaet-gso-system.netlify.app',
     'http://127.0.0.1:5500',
     'http://127.0.0.1:5501',
+    'http://127.0.0.1:5502',
+    'http://127.0.0.1:5173',
     'http://localhost:5500',
-    'http://localhost:5501'
+    'http://localhost:5501',
+    'http://localhost:5502',
+    'http://localhost:5173'
 ];
 
 const corsOptions: cors.CorsOptions = {
@@ -68,6 +74,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/internal', internalRoutes);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

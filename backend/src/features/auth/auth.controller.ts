@@ -72,7 +72,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
         try {
             const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
             if (adminEmail) {
-                const userManagementUrl = `${process.env.FRONTEND_URL}/users.html`;
+                const userManagementUrl = `${process.env.HELPDESK_FRONTEND_URL}/users`;
                 await sendEmail({
                     to: adminEmail,
                     subject: 'New User Registration Awaiting Approval',
@@ -166,7 +166,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<any> 
             $set: { passwordResetToken, passwordResetExpires }
         });
 
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
         const textContent = `You requested a password reset. Click the link to proceed: ${resetUrl}`;
         const htmlContent = `
             <p>You requested a password reset. Click the button below to update your password:</p>
@@ -293,13 +293,13 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
             { algorithm: 'RS256', expiresIn: '2m' }
         );
 
-        const targetEnv = req.query.env || 'prod';
-        const gsoFrontendUrl = targetEnv === 'dev'
+        const isDev = process.env.NODE_ENV === 'development';
+        const gsoFrontendUrl = isDev
             ? process.env.GSO_DEV_FRONTEND_URL
             : process.env.GSO_PROD_FRONTEND_URL;
 
         if (!gsoFrontendUrl) {
-            console.error(`SSO Error: GSO frontend URL for env '${targetEnv}' is not defined.`);
+            console.error(`SSO Error: GSO frontend URL for env '${isDev ? 'dev' : 'prod'}' is not defined.`);
             return res.status(500).send('SSO configuration error. Please contact an administrator.');
         }
 
@@ -339,11 +339,11 @@ export const googleCallback = (req: Request, res: Response): any => {
     const user = req.user as any;
 
     if (!user) {
-        return res.redirect(`${process.env.FRONTEND_URL}/index.html?error=google-auth-failed`);
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=google-auth-failed`);
     }
 
     if (user.status !== 'Active') {
-        return res.redirect(`${process.env.FRONTEND_URL}/index.html?status=${user.status.toLowerCase()}`);
+        return res.redirect(`${process.env.FRONTEND_URL}/login?status=${user.status.toLowerCase()}`);
     }
 
     const token = generateSessionToken(user);
@@ -355,7 +355,7 @@ export const googleCallback = (req: Request, res: Response): any => {
         maxAge: 60 * 60 * 1000 // 1 hour
     });
 
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard.html`);
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 };
 
 /**

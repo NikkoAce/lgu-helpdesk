@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 const isProduction = window.location.hostname === 'lgu-ithelpdesk.netlify.app';
-const PORTAL_URL = isProduction ? 'https://lgu-employee-portal.netlify.app' : 'http://localhost:5501';
+const PORTAL_URL = isProduction ? 'https://lgu-employee-portal.netlify.app' : 'http://localhost:5502';
 
 interface NavLinkItem {
   name: string;
@@ -94,14 +94,8 @@ const AppContent: React.FC = () => {
     checkAuth();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await fetchWithAuth('auth/logout', { method: 'POST' });
-    } catch (err) {
-      console.error('Logout failed:', err);
-    } finally {
-      window.location.href = `${PORTAL_URL}/login`;
-    }
+  const handleLogout = () => {
+    window.location.href = `${PORTAL_URL}/dashboard`;
   };
 
   if (loading) {

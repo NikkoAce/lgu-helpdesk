@@ -5,9 +5,10 @@ interface SendEmailOptions {
     subject: string;
     htmlContent: string;
     textContent: string;
+    senderName?: string;
 }
 
-export const sendEmail = async ({ to, subject, htmlContent, textContent }: SendEmailOptions): Promise<void> => {
+export const sendEmail = async ({ to, subject, htmlContent, textContent, senderName }: SendEmailOptions): Promise<void> => {
     try {
         const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
         // Cast apiInstance to any to access dynamic authentication attributes
@@ -19,7 +20,7 @@ export const sendEmail = async ({ to, subject, htmlContent, textContent }: SendE
         sendSmtpEmail.htmlContent = htmlContent;
         sendSmtpEmail.textContent = textContent;
         sendSmtpEmail.sender = {
-            name: process.env.BREVO_FROM_NAME || 'LGU Employee Portal',
+            name: senderName || process.env.BREVO_FROM_NAME || 'LGU Employee Portal',
             email: process.env.BREVO_FROM_EMAIL || 'noreply@lgudaet.gov.ph',
         };
         sendSmtpEmail.to = [{ email: to }];

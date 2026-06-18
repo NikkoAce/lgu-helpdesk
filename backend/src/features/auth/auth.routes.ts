@@ -55,7 +55,7 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get(
     '/google/callback',
     passport.authenticate('google', { 
-        failureRedirect: `${process.env.FRONTEND_URL}/index.html?error=google-auth-failed`,
+        failureRedirect: `${process.env.FRONTEND_URL}/login?error=google-auth-failed`,
         session: false // Disable express-session serialization to use JWT cookies exclusively
     }),
     googleCallback
