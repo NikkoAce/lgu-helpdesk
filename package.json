@@ -4,9 +4,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "build": "npx tailwindcss -i ./public/input.css -o ./public/css/style.css --minify",
-    "watch:css": "npx tailwindcss -i ./public/input.css -o ./public/css/style.css --watch"
+    "start": "node backend/dist/server.js",
+    "build": "npm --prefix backend install && npm --prefix backend run build"
   },
   "keywords": [],
   "author": "",
