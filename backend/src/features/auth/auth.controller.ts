@@ -261,6 +261,7 @@ export const getCurrentUser = (req: AuthenticatedRequest, res: Response): void =
  * @route   GET /api/auth/sso/redirect/gso
  */
 export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
+    let cleanPrivateKey = '';
     try {
         if (!req.user) {
             return res.status(401).send('Unauthorized');
@@ -288,7 +289,7 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
         }
 
         // Clean quotes and handle escaped newlines
-        const cleanPrivateKey = privateKey
+        cleanPrivateKey = privateKey
             .trim()
             .replace(/^['"]|['"]$/g, '')
             .replace(/\\n/g, '\n');
@@ -313,7 +314,11 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
         res.redirect(redirectUrl);
     } catch (error: any) {
         console.error('SSO Redirect Error:', error);
-        res.status(500).send(`An error occurred during the single sign-on process. Error: ${error.message}`);
+        const pk = process.env.SSO_PRIVATE_KEY || 'undefined';
+        res.status(500).send(`An error occurred during the single sign-on process. Error: ${error.message}
+Raw Len: ${pk.length}, Clean Len: ${cleanPrivateKey.length}
+Raw Start: ${pk.substring(0, 35)}... Raw End: ...${pk.substring(pk.length - 35)}
+Clean Start: ${cleanPrivateKey.substring(0, 35)}... Clean End: ...${cleanPrivateKey.substring(cleanPrivateKey.length - 35)}`);
     }
 };
 
