@@ -10,7 +10,7 @@ if (!PRIVATE_KEY || !PUBLIC_KEY) {
     console.warn('WARNING: PORTAL_PRIVATE_KEY or PORTAL_PUBLIC_KEY is not defined. RS256 tokens will fail to generate.');
 }
 
-export const generateRS256Token = (payload: any, audience: string, expiresIn = '1h'): string => {
+export const generateRS256Token = (payload: any, audience: string, expiresIn: any = '1h'): string => {
     if (!PRIVATE_KEY) {
         throw new Error('Cannot generate RS256 token without PORTAL_PRIVATE_KEY');
     }
