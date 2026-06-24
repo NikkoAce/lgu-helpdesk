@@ -14,7 +14,8 @@ import {
   Building2, 
   UserCheck,
   Clock,
-  Activity
+  Activity,
+  Tag
 } from 'lucide-react';
 
 interface TicketDetailsProps {
@@ -41,6 +42,7 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
   const [assignedToValue, setAssignedToValue] = useState<string>('');
   const [statusReason, setStatusReason] = useState('');
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const [assetTag, setAssetTag] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [ictoUsers, setIctoUsers] = useState<HelpdeskUser[]>([]);
 
@@ -52,6 +54,7 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
       setTicket(data);
       setStatusValue(data.status);
       setAssignedToValue(data.assignedTo?._id || data.assignedTo?.id || '');
+      setAssetTag(data.assetTag || '');
       setError(null);
     } catch (err: any) {
       console.error('Failed to fetch ticket details:', err);
@@ -137,6 +140,7 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
           status: statusValue, 
           assignedTo: assignedToValue,
           statusReason: statusReason.trim(),
+          assetTag: assetTag.trim(),
           resolutionNotes: (statusValue === 'Resolved' || statusValue === 'Closed') ? resolutionNotes.trim() : undefined
         }
       });
@@ -269,6 +273,12 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
                     <span className="font-semibold text-base-content/60 flex items-center gap-1.5"><Calendar size={12} /> Created</span>
                     <span className="text-base-content font-bold">{new Date(ticket.createdAt).toLocaleDateString()}</span>
                   </div>
+                  {ticket.assetTag && !isIctoRole && (
+                    <div className="flex justify-between items-center py-1 border-t border-base-200 mt-1">
+                      <span className="font-semibold text-base-content/60 flex items-center gap-1.5"><Tag size={12} /> Asset Tag</span>
+                      <span className="text-base-content font-mono font-bold bg-base-200 px-2 py-0.5 rounded">{ticket.assetTag}</span>
+                    </div>
+                  )}
                   {(ticket.firstResponseAt || ticket.resolvedAt) && (
                     <>
                       <div className="divider my-1"></div>
@@ -326,6 +336,19 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
                           <option key={u._id} value={u._id}>{u.name}</option>
                         ))}
                       </select>
+                    </div>
+                    <div className="form-control">
+                      <label htmlFor="asset-tag" className="label py-1">
+                        <span className="label-text text-xs font-semibold">Asset Tag</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="asset-tag" 
+                        value={assetTag}
+                        onChange={(e) => setAssetTag(e.target.value)}
+                        placeholder="e.g. PC-2023-001"
+                        className="input input-bordered input-sm w-full font-mono text-xs"
+                      />
                     </div>
                     {statusValue !== ticket.status && (
                       <div className="form-control">

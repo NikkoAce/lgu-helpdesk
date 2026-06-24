@@ -58,6 +58,7 @@ export interface SupportTicket {
   resolutionNotes?: string;
   statusHistory: TicketStatusHistory[];
   comments: TicketComment[];
+  assetTag?: string;
   createdAt: string;
   updatedAt: string;
 }

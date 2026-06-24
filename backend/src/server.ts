@@ -13,6 +13,9 @@ import ticketRoutes from './features/tickets/ticket.routes';
 import userRoutes from './features/users/user.routes';
 import analyticsRoutes from './features/analytics/analytics.routes';
 import internalRoutes from './features/internal/internal.routes';
+import identityRoutes from './features/identity/identity.routes';
+import officeRoutes from './features/identity/office.routes';
+import knowledgeRoutes from './features/knowledge/knowledge.routes';
 
 // Load passport configuration
 import './config/passport';
@@ -75,6 +78,9 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/internal', internalRoutes);
+app.use('/api/v1/identity', identityRoutes);
+app.use('/api/offices', officeRoutes);
+app.use('/api/knowledge', knowledgeRoutes);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

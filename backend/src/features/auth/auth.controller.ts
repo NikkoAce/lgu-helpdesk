@@ -20,6 +20,9 @@ const generateSessionToken = (user: any): string => {
             name: user.name,
             role: user.role,
             office: user.office,
+            officeId: user.officeId?._id || user.officeId,
+            officeCode: user.officeId?.officeCode,
+            officeName: user.officeId?.officeName || user.office,
             email: user.email,
             systemAccess: user.systemAccess || []
         }
@@ -33,9 +36,9 @@ const generateSessionToken = (user: any): string => {
  */
 export const registerUser = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { employeeId, employmentType, name, role, password, office, email } = req.body;
-        if (!employeeId || !employmentType || !name || !role || !password || !office || !email) {
-            return res.status(400).json({ message: 'All fields are required.' });
+        const { employeeId, employmentType, name, role, password, office, officeId, email } = req.body;
+        if (!employeeId || !employmentType || !name || !role || !password || (!office && !officeId) || !email) {
+            return res.status(400).json({ message: 'All required fields must be provided.' });
         }
 
         // Limit self-registration roles
@@ -67,6 +70,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
             name,
             role,
             office,
+            officeId,
             email,
             password: hashedPassword,
             status: 'Pending'
@@ -117,7 +121,7 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
             return res.status(400).json({ message: 'Employee ID and password are required.' });
         }
 
-        const user = await User.findOne({ employeeId });
+        const user = await User.findOne({ employeeId }).populate('officeId');
 
         if (user && user.status !== 'Active') {
             const reason = user.status === 'Pending' ? 'awaiting administrator approval' : 'rejected or inactive';
@@ -292,7 +296,7 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
             return res.status(401).send('Unauthorized');
         }
         const userId = req.user.id;
-        const latestUser = await User.findById(userId).select('id name role office email');
+        const latestUser = await User.findById(userId).select('id name role office officeId email').populate('officeId');
 
         if (!latestUser) {
             return res.status(404).send('User not found. Unable to proceed with single sign-on.');
@@ -303,6 +307,9 @@ export const ssoRedirectGso = async (req: AuthenticatedRequest, res: Response): 
             name: latestUser.name,
             role: latestUser.role,
             office: latestUser.office,
+            officeId: (latestUser.officeId as any)?._id || latestUser.officeId,
+            officeCode: (latestUser.officeId as any)?.officeCode,
+            officeName: (latestUser.officeId as any)?.officeName || latestUser.office,
             email: latestUser.email
         };
 

@@ -8,6 +8,7 @@ export interface IUser extends Document {
     name: string;
     role: string;
     office: string;
+    officeId?: mongoose.Types.ObjectId;
     departmentId?: mongoose.Types.ObjectId;
     systemAccess: string[];
     email: string;
@@ -28,6 +29,7 @@ const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     role: { type: String, required: true, default: 'Employee' },
     office: { type: String, required: true, default: 'Unassigned' },
+    officeId: { type: Schema.Types.ObjectId, ref: 'Office' },
     departmentId: { type: Schema.Types.ObjectId, ref: 'Department' },
     systemAccess: [{ type: String }],
     email: { type: String, required: true, unique: true },

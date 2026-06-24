@@ -4,13 +4,7 @@ import { sendNotification } from './internal.controller';
 
 const router = Router();
 
-const verifyInternalApiKey = (req: Request, res: Response, next: NextFunction) => {
-    const apiKey = req.headers['x-api-key'];
-    if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
-        return res.status(401).json({ success: false, message: 'Unauthorized: Invalid API Key' });
-    }
-    next();
-};
+import { validateSystemApiKey } from '../../middleware/apiKey.middleware';
 
 const notifyLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -18,6 +12,6 @@ const notifyLimiter = rateLimit({
     message: { success: false, message: 'Too many notification requests from this IP, please try again later.' }
 });
 
-router.post('/notify', notifyLimiter, verifyInternalApiKey, sendNotification);
+router.post('/notify', notifyLimiter, validateSystemApiKey('PPEMS', 'ZONING'), sendNotification);
 
 export default router;

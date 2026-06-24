@@ -45,7 +45,7 @@ export const Users: React.FC = () => {
   useEffect(() => {
     const fetchOffices = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/users/offices`);
+        const response = await fetch(`${BASE_URL}/offices`);
         if (response.ok) {
           const list = await response.json();
           setOffices(list);
@@ -133,9 +133,12 @@ export const Users: React.FC = () => {
     setError(null);
 
     try {
+      const selectedOfficeOption = document.querySelector(`option[value="${editForm.office}"]`) as HTMLOptionElement;
+      const officeId = selectedOfficeOption ? selectedOfficeOption.getAttribute('data-officeid') : undefined;
+
       await fetchWithAuth(`users/${editingUser._id}`, {
         method: 'PATCH',
-        body: editForm
+        body: { ...editForm, officeId }
       });
       setSuccess('User updated successfully!');
       setTimeout(() => setSuccess(null), 3000);
@@ -363,7 +366,7 @@ export const Users: React.FC = () => {
                   className="select select-bordered select-sm w-full"
                 >
                   <option value="">Select Office</option>
-                  {offices.map(o => <option key={o._id} value={o.name}>{o.name}</option>)}
+                  {offices.map(o => <option key={o._id} value={o.officeName} data-officeid={o._id}>{o.officeName}</option>)}
                 </select>
               </div>
 

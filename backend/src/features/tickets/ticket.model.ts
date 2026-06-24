@@ -29,6 +29,7 @@ export interface ITicket extends Document {
     urgency?: string;
     status: string;
     assignedTo?: Types.ObjectId;
+    assetTag?: string;
     firstResponseAt?: Date;
     resolvedAt?: Date;
     resolutionNotes?: string;
@@ -65,6 +66,7 @@ const ticketSchema = new Schema<ITicket>({
     urgency: String,
     status: { type: String, default: 'New' },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    assetTag: { type: String },
     firstResponseAt: { type: Date },
     resolvedAt: { type: Date },
     resolutionNotes: { type: String },

@@ -11,6 +11,7 @@ import { Tickets } from './pages/Tickets';
 import { TicketDetails } from './pages/TicketDetails';
 import { Users } from './pages/Users';
 import { Analytics } from './pages/Analytics';
+import { KnowledgeBase } from './pages/KnowledgeBase';
 
 import { 
   Home, 
@@ -21,7 +22,8 @@ import {
   ArrowLeftRight, 
   LogOut, 
   Menu, 
-  X 
+  X,
+  Book
 } from 'lucide-react';
 
 const isProduction = window.location.hostname === 'lgu-ithelpdesk.netlify.app';
@@ -112,7 +114,8 @@ const AppContent: React.FC = () => {
   // Build navigation items based on role
   const commonLinks: NavLinkItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: <Home size={18} /> },
-    { name: 'New Ticket', href: '/new-ticket', icon: <FileText size={18} /> }
+    { name: 'New Ticket', href: '/new-ticket', icon: <FileText size={18} /> },
+    { name: 'Knowledge Base', href: '/knowledge', icon: <Book size={18} /> }
   ];
 
   const ictoLinks: NavLinkItem[] = [
@@ -221,6 +224,7 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-ticket" element={<NewTicket />} />
+          <Route path="/knowledge" element={<KnowledgeBase />} />
           <Route path="/ticket/:id" element={<TicketDetails currentUser={currentUser} />} />
           
           {/* Legacy compatibility redirect routes */}

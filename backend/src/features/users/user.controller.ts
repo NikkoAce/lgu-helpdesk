@@ -48,7 +48,7 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response): Prom
         return res.status(403).json({ message: 'Forbidden: Access is restricted to ICTO personnel.' });
     }
     try {
-        const { name, role, office, employeeId } = req.body;
+        const { name, role, office, officeId, employeeId } = req.body;
         const updateData: any = {};
 
         if (name) updateData.name = name;
@@ -61,6 +61,7 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response): Prom
         }
         if (role) updateData.role = role;
         if (office) updateData.office = office;
+        if (officeId) updateData.officeId = officeId;
 
         if (Object.keys(updateData).length === 0) {
             return res.status(400).json({ message: 'No update data provided.' });
@@ -145,7 +146,7 @@ export const updateUserProfile = async (req: AuthenticatedRequest, res: Response
         if (!req.user) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-        const { name, email, office } = req.body;
+        const { name, email, office, officeId } = req.body;
         const userId = req.user.id;
 
         const user = await User.findById(userId);
@@ -163,6 +164,7 @@ export const updateUserProfile = async (req: AuthenticatedRequest, res: Response
 
         if (name) user.name = name;
         if (office) user.office = office;
+        if (officeId) user.officeId = officeId;
 
         const updatedUser = await user.save();
         const userObj = updatedUser.toObject({
@@ -180,37 +182,7 @@ export const updateUserProfile = async (req: AuthenticatedRequest, res: Response
     }
 };
 
-/**
- * @desc    SSO Office lookup helper proxy (fetches public offices from GSO System API)
- * @route   GET /api/users/offices
- */
-export const getGsoOffices = async (_req: Request, res: Response): Promise<any> => {
-    try {
-        const gsoApiUrl = process.env.GSO_API_URL || 'https://gso-backend-mns8.onrender.com';
-        const internalApiKey = process.env.INTERNAL_API_KEY;
 
-        if (!internalApiKey) {
-            console.error('FATAL: INTERNAL_API_KEY is not defined.');
-            return res.status(500).json({ message: 'Server configuration error.' });
-        }
-
-        // Native node global fetch invocation
-        const response = await fetch(`${gsoApiUrl}/api/offices/public`, {
-            headers: {
-                'X-Internal-API-Key': internalApiKey
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`GSO API responded with status: ${response.status}`);
-        }
-        const offices = await response.json();
-        res.status(200).json(offices);
-    } catch (error: any) {
-        console.error('Error proxying request to GSO for offices:', error);
-        res.status(502).json({ message: 'Could not retrieve office list from the GSO system.' });
-    }
-};
 
 /**
  * @desc    Approve or reject a pending registration (ICTO only)

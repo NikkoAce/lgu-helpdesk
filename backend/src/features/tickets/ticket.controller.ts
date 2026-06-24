@@ -76,7 +76,8 @@ export const createTicket = async (req: AuthenticatedRequest, res: Response): Pr
             requesterId: req.user.id,
             requesterName: req.user.name,
             requesterRole: req.user.role,
-            requesterOffice: req.user.office
+            requesterOffice: req.user.office,
+            assetTag: req.body.assetTag
         });
         await newTicket.save();
         res.status(201).json({ message: 'Ticket created successfully!', ticket: { ...newTicket.toObject(), id: newTicket._id } });
@@ -154,7 +155,7 @@ export const addComment = async (req: AuthenticatedRequest, res: Response): Prom
  */
 export const updateTicketStatus = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
     try {
-        const { status, assignedTo, resolutionNotes, statusReason } = req.body;
+        const { status, assignedTo, resolutionNotes, statusReason, assetTag } = req.body;
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ message: 'Invalid Ticket ID.' });
         }
@@ -212,6 +213,10 @@ export const updateTicketStatus = async (req: AuthenticatedRequest, res: Respons
         
         if (assignedTo !== undefined) {
             updateData.assignedTo = assignedTo === '' ? null : assignedTo;
+        }
+
+        if (assetTag !== undefined) {
+            updateData.assetTag = assetTag;
         }
 
         const updatedTicket = await Ticket.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('assignedTo', 'name role');
