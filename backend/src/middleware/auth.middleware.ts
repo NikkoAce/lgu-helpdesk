@@ -19,7 +19,13 @@ export interface AuthenticatedRequest extends Request {
 
 const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     // req.cookies is populated by cookie-parser middleware
-    const token = req.cookies?.portalAuthToken;
+    let token = req.cookies?.portalAuthToken;
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        const bearerToken = req.headers.authorization.split(' ')[1];
+        if (bearerToken !== 'null' && bearerToken !== 'undefined') {
+            token = bearerToken;
+        }
+    }
 
     if (!token) {
         res.status(401).json({ message: 'Access denied. No token provided.' });
