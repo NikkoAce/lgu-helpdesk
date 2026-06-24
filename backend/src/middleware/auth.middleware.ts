@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-if (!process.env.JWT_SECRET) {
-    throw new Error('FATAL: JWT_SECRET environment variable is missing.');
+if (!process.env.PORTAL_PUBLIC_KEY) {
+    console.warn('WARNING: PORTAL_PUBLIC_KEY environment variable is missing. RS256 verification may fail.');
 }
-const JWT_SECRET = process.env.JWT_SECRET;
+const PUBLIC_KEY = process.env.PORTAL_PUBLIC_KEY ? process.env.PORTAL_PUBLIC_KEY.replace(/\\n/g, '\n') : '';
 
 export interface AuthenticatedRequest extends Request {
     user?: {
@@ -27,7 +27,10 @@ const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunc
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { user: NonNullable<AuthenticatedRequest['user']> };
+        if (!PUBLIC_KEY) {
+            throw new Error('Server missing public key configuration.');
+        }
+        const decoded = jwt.verify(token, PUBLIC_KEY, { algorithms: ['RS256'] }) as { user: NonNullable<AuthenticatedRequest['user']> };
         req.user = decoded.user;
         next();
     } catch (ex) {

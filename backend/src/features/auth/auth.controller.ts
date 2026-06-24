@@ -6,10 +6,7 @@ import crypto from 'crypto';
 import { sendEmail } from '../../services/email.service';
 import { AuthenticatedRequest } from '../../middleware/auth.middleware';
 
-if (!process.env.JWT_SECRET) {
-    throw new Error('FATAL: JWT_SECRET environment variable is missing.');
-}
-const JWT_SECRET = process.env.JWT_SECRET;
+// JWT_SECRET is no longer used, we use RS256 with PORTAL_PRIVATE_KEY
 
 import AuditLog from '../internal/auditLog.model';
 import { generateRS256Token, getJwks } from '../../utils/jwt.utils';
