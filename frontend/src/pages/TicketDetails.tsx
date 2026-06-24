@@ -12,7 +12,9 @@ import {
   User, 
   Calendar, 
   Building2, 
-  UserCheck 
+  UserCheck,
+  Clock,
+  Activity
 } from 'lucide-react';
 
 interface TicketDetailsProps {
@@ -36,7 +38,11 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
 
   // Status Change States
   const [statusValue, setStatusValue] = useState('New');
+  const [assignedToValue, setAssignedToValue] = useState<string>('');
+  const [statusReason, setStatusReason] = useState('');
+  const [resolutionNotes, setResolutionNotes] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [ictoUsers, setIctoUsers] = useState<HelpdeskUser[]>([]);
 
   const fetchDetails = async () => {
     if (!id) return;
@@ -45,6 +51,7 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
       const data = await fetchWithAuth<SupportTicket>(`tickets/${id}`);
       setTicket(data);
       setStatusValue(data.status);
+      setAssignedToValue(data.assignedTo?._id || data.assignedTo?.id || '');
       setError(null);
     } catch (err: any) {
       console.error('Failed to fetch ticket details:', err);
@@ -57,6 +64,19 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
   useEffect(() => {
     fetchDetails();
   }, [id]);
+
+  const isIctoRole = currentUser?.role && currentUser.role.includes('ICTO');
+
+  useEffect(() => {
+    if (isIctoRole) {
+      fetchWithAuth<HelpdeskUser[]>('users')
+        .then(users => {
+          const ictos = users.filter(u => u.role && u.role.includes('ICTO'));
+          setIctoUsers(ictos);
+        })
+        .catch(console.error);
+    }
+  }, [isIctoRole]);
 
   const handleCommentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -113,9 +133,16 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
     try {
       const updatedTicket = await fetchWithAuth<SupportTicket>(`tickets/${id}`, {
         method: 'PATCH',
-        body: { status: statusValue }
+        body: { 
+          status: statusValue, 
+          assignedTo: assignedToValue,
+          statusReason: statusReason.trim(),
+          resolutionNotes: (statusValue === 'Resolved' || statusValue === 'Closed') ? resolutionNotes.trim() : undefined
+        }
       });
       setTicket(updatedTicket);
+      setStatusReason('');
+      setResolutionNotes('');
       setSuccess('Ticket status updated successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
@@ -156,7 +183,7 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
     }
   };
 
-  const isIctoRole = currentUser?.role && currentUser.role.includes('ICTO');
+  // isIctoRole is already defined above
 
   if (loading) {
     return (
@@ -242,6 +269,24 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
                     <span className="font-semibold text-base-content/60 flex items-center gap-1.5"><Calendar size={12} /> Created</span>
                     <span className="text-base-content font-bold">{new Date(ticket.createdAt).toLocaleDateString()}</span>
                   </div>
+                  {(ticket.firstResponseAt || ticket.resolvedAt) && (
+                    <>
+                      <div className="divider my-1"></div>
+                      <h4 className="text-[10px] uppercase font-bold text-base-content/40 mb-2">SLA Tracking</h4>
+                      {ticket.firstResponseAt && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="font-semibold text-base-content/60 flex items-center gap-1.5"><Clock size={12} /> Responded</span>
+                          <span className="text-base-content font-bold">{new Date(ticket.firstResponseAt).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                      {ticket.resolvedAt && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="font-semibold text-base-content/60 flex items-center gap-1.5"><Clock size={12} /> Resolved</span>
+                          <span className="text-base-content font-bold">{new Date(ticket.resolvedAt).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -266,9 +311,55 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
                         <option value="Closed">Closed</option>
                       </select>
                     </div>
+                    <div className="form-control">
+                      <label htmlFor="assign-select" className="label py-1">
+                        <span className="label-text text-xs font-semibold">Assign To</span>
+                      </label>
+                      <select 
+                        id="assign-select" 
+                        value={assignedToValue}
+                        onChange={(e) => setAssignedToValue(e.target.value)}
+                        className="select select-bordered select-sm w-full"
+                      >
+                        <option value="">-- Unassigned --</option>
+                        {ictoUsers.map(u => (
+                          <option key={u._id} value={u._id}>{u.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {statusValue !== ticket.status && (
+                      <div className="form-control">
+                        <label htmlFor="status-reason" className="label py-1">
+                          <span className="label-text text-xs font-semibold">Reason for Change (Required)</span>
+                        </label>
+                        <textarea 
+                          id="status-reason" 
+                          value={statusReason}
+                          onChange={(e) => setStatusReason(e.target.value)}
+                          className="textarea textarea-bordered text-xs w-full"
+                          rows={2}
+                          required
+                        />
+                      </div>
+                    )}
+                    {(statusValue === 'Resolved' || statusValue === 'Closed') && statusValue !== ticket.status && (
+                      <div className="form-control">
+                        <label htmlFor="resolution-notes" className="label py-1">
+                          <span className="label-text text-xs font-semibold">Resolution Notes (Required)</span>
+                        </label>
+                        <textarea 
+                          id="resolution-notes" 
+                          value={resolutionNotes}
+                          onChange={(e) => setResolutionNotes(e.target.value)}
+                          className="textarea textarea-bordered text-xs w-full"
+                          rows={3}
+                          required
+                        />
+                      </div>
+                    )}
                     <button 
                       type="submit" 
-                      disabled={updatingStatus}
+                      disabled={updatingStatus || (statusValue !== ticket.status && !statusReason) || ((statusValue === 'Resolved' || statusValue === 'Closed') && statusValue !== ticket.status && !resolutionNotes)}
                       className="btn btn-primary btn-sm w-full mt-2"
                     >
                       {updatingStatus ? <span className="loading loading-spinner loading-xs"></span> : 'Update Status'}
@@ -287,6 +378,36 @@ export const TicketDetails: React.FC<TicketDetailsProps> = ({ currentUser }) => 
                   {ticket.description}
                 </p>
               </div>
+
+              {/* Status History */}
+              {ticket.statusHistory && ticket.statusHistory.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold font-heading text-base-content flex items-center gap-2">
+                    <Activity size={18} />
+                    <span>Status History</span>
+                  </h3>
+                  <div className="bg-base-100 rounded-2xl border border-base-300 p-6 shadow-sm">
+                    <ul className="steps steps-vertical text-xs w-full">
+                      {ticket.statusHistory.map((history, idx) => (
+                        <li key={idx} className="step step-primary w-full text-left ml-0">
+                          <div className="flex flex-col text-left mb-4 mt-1">
+                            <span className="font-bold text-sm">
+                              {history.fromStatus} → {history.status}
+                            </span>
+                            <span className="text-base-content/60 mb-1">{new Date(history.changedAt).toLocaleString()}</span>
+                            {history.reason && (
+                              <span className="bg-base-200 p-2 rounded mt-1 italic text-base-content/80">Reason: {history.reason}</span>
+                            )}
+                            {history.notes && (
+                              <span className="bg-base-200 p-2 rounded mt-1 text-base-content/80">Notes: {history.notes}</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
 
               {/* Conversation Feeds */}
               <div className="space-y-4">

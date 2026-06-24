@@ -30,6 +30,15 @@ export interface TicketComment {
   createdAt: string;
 }
 
+export interface TicketStatusHistory {
+  status: string;
+  fromStatus: string;
+  changedBy: string;
+  changedAt: string;
+  notes?: string;
+  reason: string;
+}
+
 export interface SupportTicket {
   _id: string;
   id: string;
@@ -43,6 +52,11 @@ export interface SupportTicket {
   requesterName: string;
   requesterRole: string;
   requesterOffice?: string;
+  assignedTo?: { _id: string; id: string; name: string; role: string; };
+  firstResponseAt?: string;
+  resolvedAt?: string;
+  resolutionNotes?: string;
+  statusHistory: TicketStatusHistory[];
   comments: TicketComment[];
   createdAt: string;
   updatedAt: string;

@@ -3,6 +3,7 @@ import Ticket from './ticket.model';
 import { v2 as cloudinary } from 'cloudinary';
 import mongoose from 'mongoose';
 import { AuthenticatedRequest } from '../../middleware/auth.middleware';
+import AuditLog from '../internal/auditLog.model';
 
 /**
  * @desc    Get tickets list scoped by role/office (ICTO, Department Head, Employee)
@@ -17,16 +18,22 @@ export const getAllTickets = async (req: AuthenticatedRequest, res: Response): P
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
         const skip = (page - 1) * limit;
-        const { status, search } = req.query;
+        const { status, search, assignment } = req.query;
         const queryFilter: any = {};
 
         // Role-based visibility scoping
         if (role.includes('ICTO')) {
             // ICTO Staff/Head sees all tickets
+            if (assignment === 'me') {
+                queryFilter.assignedTo = req.user.id;
+            }
         } else if (role === 'Department Head') {
             queryFilter.requesterOffice = office;
         } else {
-            queryFilter.requesterName = name;
+            queryFilter.$or = [
+                { requesterId: req.user.id },
+                { requesterName: name, requesterId: { $exists: false } }
+            ];
         }
 
         if (status && status !== 'All') {
@@ -41,7 +48,8 @@ export const getAllTickets = async (req: AuthenticatedRequest, res: Response): P
         const tickets = await Ticket.find(queryFilter)
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .populate('assignedTo', 'name role');
         const responseTickets = tickets.map(t => ({ ...t.toObject(), id: t._id }));
 
         res.status(200).json({
@@ -65,6 +73,7 @@ export const createTicket = async (req: AuthenticatedRequest, res: Response): Pr
         }
         const newTicket = new Ticket({
             ...req.body,
+            requesterId: req.user.id,
             requesterName: req.user.name,
             requesterRole: req.user.role,
             requesterOffice: req.user.office
@@ -85,7 +94,7 @@ export const getTicketById = async (req: AuthenticatedRequest, res: Response): P
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ message: 'Invalid Ticket ID.' });
         }
-        const ticket = await Ticket.findById(req.params.id);
+        const ticket = await Ticket.findById(req.params.id).populate('assignedTo', 'name role');
         if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found.' });
         }
@@ -118,6 +127,10 @@ export const addComment = async (req: AuthenticatedRequest, res: Response): Prom
             return res.status(404).json({ message: 'Ticket not found.' });
         }
 
+        if (req.user.role.includes('ICTO') && !ticket.firstResponseAt) {
+            ticket.firstResponseAt = new Date();
+        }
+
         const newComment: any = {
             author: req.user.name,
             content: content,
@@ -141,19 +154,81 @@ export const addComment = async (req: AuthenticatedRequest, res: Response): Prom
  */
 export const updateTicketStatus = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
     try {
-        const { status } = req.body;
+        const { status, assignedTo, resolutionNotes, statusReason } = req.body;
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ message: 'Invalid Ticket ID.' });
         }
-        const allowedStatuses = ['New', 'In Progress', 'Resolved', 'Closed'];
-        if (!status || !allowedStatuses.includes(status)) {
-            return res.status(400).json({ message: 'Invalid or missing status.' });
-        }
-        const updatedTicket = await Ticket.findByIdAndUpdate(req.params.id, { status }, { new: true });
-        if (!updatedTicket) {
+
+        const ticket = await Ticket.findById(req.params.id);
+        if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found.' });
         }
-        res.status(200).json({ ...updatedTicket.toObject(), id: updatedTicket._id });
+        
+        let updateData: any = {};
+        
+        if (status && status !== ticket.status) {
+            const allowedStatuses = ['New', 'In Progress', 'Resolved', 'Closed'];
+            if (!allowedStatuses.includes(status)) {
+                return res.status(400).json({ message: 'Invalid status.' });
+            }
+
+            if (!statusReason) {
+                return res.status(400).json({ message: 'statusReason is required for status transitions.' });
+            }
+
+            if (['Resolved', 'Closed'].includes(ticket.status) && ['New'].includes(status)) {
+                return res.status(400).json({ message: 'Cannot move ticket from Resolved/Closed back to New.' });
+            }
+
+            if (['Resolved', 'Closed'].includes(status) && !resolutionNotes) {
+                return res.status(400).json({ message: 'resolutionNotes are required when resolving or closing a ticket.' });
+            }
+
+            if (status === 'In Progress' && !ticket.firstResponseAt) {
+                updateData.firstResponseAt = new Date();
+            }
+
+            if (['Resolved', 'Closed'].includes(status) && !ticket.resolvedAt) {
+                updateData.resolvedAt = new Date();
+            }
+
+            if (resolutionNotes) {
+                updateData.resolutionNotes = resolutionNotes;
+            }
+
+            updateData.$push = {
+                statusHistory: {
+                    status: status,
+                    fromStatus: ticket.status,
+                    changedBy: req.user?.id || 'system',
+                    changedAt: new Date(),
+                    notes: resolutionNotes,
+                    reason: statusReason
+                }
+            };
+            
+            updateData.status = status;
+        }
+        
+        if (assignedTo !== undefined) {
+            updateData.assignedTo = assignedTo === '' ? null : assignedTo;
+        }
+
+        const updatedTicket = await Ticket.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('assignedTo', 'name role');
+        
+        if (status && status !== ticket.status) {
+            try {
+                await AuditLog.create({
+                    action: 'ticket_status_change',
+                    performedBy: req.user?.id || 'system',
+                    details: `Ticket ${ticket._id} status changed to ${status}`
+                });
+            } catch (e) {
+                console.error('Failed to write audit log:', e);
+            }
+        }
+
+        res.status(200).json({ ...updatedTicket!.toObject(), id: updatedTicket!._id });
     } catch (error: any) {
         res.status(500).json({ message: 'Error updating ticket status', error: error.message });
     }

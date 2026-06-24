@@ -14,6 +14,10 @@ interface AnalyticsSummary {
   inProgress: number;
   resolved: number;
   closed: number;
+  sla?: {
+    avgResponseTimeHours: number;
+    avgResolutionTimeHours: number;
+  };
 }
 
 export const Analytics: React.FC = () => {
@@ -144,6 +148,29 @@ export const Analytics: React.FC = () => {
               <div className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider mt-1">Closed</div>
             </div>
           </div>
+
+          {/* SLA Metrics Panel */}
+          {summary.sla && (
+            <div className="bg-base-100 p-6 rounded-2xl border border-base-300 shadow-sm">
+              <h3 className="text-lg font-bold font-heading mb-4">SLA Performance</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col">
+                  <span className="text-xs text-base-content/60 font-bold uppercase tracking-wider mb-1">Avg Response Time</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold text-primary">{summary.sla.avgResponseTimeHours}</span>
+                    <span className="text-sm text-base-content/60 font-semibold">hours</span>
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-base-content/60 font-bold uppercase tracking-wider mb-1">Avg Resolution Time</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold text-secondary">{summary.sla.avgResolutionTimeHours}</span>
+                    <span className="text-sm text-base-content/60 font-semibold">hours</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Chart Panel */}
           <div className="bg-base-100 rounded-3xl border border-base-300 p-6 md:p-8 shadow-sm flex flex-col items-center space-y-6">

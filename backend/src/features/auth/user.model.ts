@@ -2,10 +2,14 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUser extends Document {
     employeeId?: string;
+    employeeIdVerified: boolean;
+    employeeIdSource?: string;
     employmentType: string;
     name: string;
     role: string;
     office: string;
+    departmentId?: mongoose.Types.ObjectId;
+    systemAccess: string[];
     email: string;
     password?: string;
     googleId?: string;
@@ -18,10 +22,14 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>({
     employeeId: { type: String },
+    employeeIdVerified: { type: Boolean, default: false },
+    employeeIdSource: { type: String },
     employmentType: { type: String, required: true, default: 'Permanent' },
     name: { type: String, required: true },
     role: { type: String, required: true, default: 'Employee' },
     office: { type: String, required: true, default: 'Unassigned' },
+    departmentId: { type: Schema.Types.ObjectId, ref: 'Department' },
+    systemAccess: [{ type: String }],
     email: { type: String, required: true, unique: true },
     password: { type: String },
     googleId: { type: String },

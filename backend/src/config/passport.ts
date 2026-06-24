@@ -2,11 +2,15 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import passport from 'passport';
 import User from '../features/auth/user.model';
 
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    throw new Error('FATAL: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables must be provided.');
+}
+
 passport.use(
     new GoogleStrategy(
         {
-            clientID: process.env.GOOGLE_CLIENT_ID || 'dummy_id',
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy_secret',
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             accessType: 'offline',
             callbackURL: '/api/auth/google/callback',
             scope: ['profile', 'email'],

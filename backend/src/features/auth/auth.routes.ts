@@ -12,7 +12,8 @@ import {
     ssoRedirectHelpdesk,
     googleCallback,
     checkEmployeeId,
-    changePassword
+    changePassword,
+    getJwksEndpoint
 } from './auth.controller';
 import authMiddleware from '../../middleware/auth.middleware';
 
@@ -39,6 +40,7 @@ const loginLimiter = rateLimit({
     }
 });
 
+router.get('/.well-known/jwks.json', getJwksEndpoint);
 router.post('/register', registerUser);
 router.post('/login', loginLimiter, loginUser);
 router.post('/logout', logoutUser);

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import User from '../auth/user.model';
 import { sendEmail } from '../../services/email.service';
 import { AuthenticatedRequest } from '../../middleware/auth.middleware';
+import AuditLog from '../internal/auditLog.model';
 
 /**
  * @desc    Get all users list (ICTO only)
@@ -74,6 +75,20 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response): Prom
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found.' });
         }
+
+        if (role) {
+            try {
+                await AuditLog.create({
+                    action: 'role_change',
+                    performedBy: req.user.id,
+                    targetUser: updatedUser._id,
+                    details: `User role changed to ${role}`
+                });
+            } catch (auditErr: any) {
+                console.error('Failed to log role change:', auditErr.message);
+            }
+        }
+
         res.status(200).json(updatedUser);
     } catch (error: any) {
         res.status(500).json({ message: 'Error updating user', error: error.message });
@@ -241,6 +256,17 @@ export const updateUserStatus = async (req: AuthenticatedRequest, res: Response)
                 `,
                 textContent: `Hello ${user.name},\n\nCongratulations! Your account for the LGU Daet Employee Portal has been approved. You can now log in at: ${portalLoginUrl}\n\nThank you,\nThe LGU Employee Portal Team`
             });
+
+            try {
+                await AuditLog.create({
+                    action: 'approval',
+                    performedBy: req.user.id,
+                    targetUser: user._id,
+                    details: `User ${user.employeeId} approved.`
+                });
+            } catch (auditErr: any) {
+                console.error('Failed to log approval:', auditErr.message);
+            }
 
             res.status(200).json({ message: `User ${user.name} has been approved.` });
         } else { // status === 'Rejected'

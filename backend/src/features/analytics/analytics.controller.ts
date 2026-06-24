@@ -51,12 +51,44 @@ export const getMainAnalytics = async (req: AuthenticatedRequest, res: Response)
             Ticket.countDocuments({ status: 'Resolved' }),
             Ticket.countDocuments({ status: 'Closed' })
         ]);
+
+        const slaMetrics = await Ticket.aggregate([
+            {
+                $match: {
+                    status: { $in: ['Resolved', 'Closed'] },
+                    firstResponseAt: { $exists: true, $ne: null },
+                    resolvedAt: { $exists: true, $ne: null }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    avgResponseTimeHours: {
+                        $avg: {
+                            $divide: [{ $subtract: ['$firstResponseAt', '$createdAt'] }, 1000 * 60 * 60]
+                        }
+                    },
+                    avgResolutionTimeHours: {
+                        $avg: {
+                            $divide: [{ $subtract: ['$resolvedAt', '$createdAt'] }, 1000 * 60 * 60]
+                        }
+                    }
+                }
+            }
+        ]);
+
+        const sla = slaMetrics.length > 0 ? {
+            avgResponseTimeHours: Number(slaMetrics[0].avgResponseTimeHours.toFixed(2)),
+            avgResolutionTimeHours: Number(slaMetrics[0].avgResolutionTimeHours.toFixed(2))
+        } : { avgResponseTimeHours: 0, avgResolutionTimeHours: 0 };
+
         res.status(200).json({
             totalTickets,
             new: newTickets,
             inProgress: inProgressTickets,
             resolved: resolvedTickets,
-            closed: closedTickets
+            closed: closedTickets,
+            sla
         });
     } catch (error: any) {
         res.status(500).json({ message: 'Error fetching analytics summary', error: error.message });

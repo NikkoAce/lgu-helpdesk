@@ -6,20 +6,28 @@ import crypto from 'crypto';
 import { sendEmail } from '../../services/email.service';
 import { AuthenticatedRequest } from '../../middleware/auth.middleware';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+if (!process.env.JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET environment variable is missing.');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
+
+import AuditLog from '../internal/auditLog.model';
+import { generateRS256Token, getJwks } from '../../utils/jwt.utils';
 
 // Helper function to generate a secure 1-hour session token
 const generateSessionToken = (user: any): string => {
     const payload = {
         user: {
             id: user._id,
+            employeeId: user.employeeId,
             name: user.name,
             role: user.role,
             office: user.office,
-            email: user.email
+            email: user.email,
+            systemAccess: user.systemAccess || []
         }
     };
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    return generateRS256Token(payload, 'lgu-daet-portal', '1h');
 };
 
 /**
@@ -137,6 +145,18 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 60 * 60 * 1000 // 1 hour
         });
+
+        // Audit Log
+        try {
+            await AuditLog.create({
+                action: 'login',
+                performedBy: user._id,
+                targetUser: user._id,
+                details: `User ${user.employeeId} logged in successfully.`
+            });
+        } catch (auditErr: any) {
+            console.error('Failed to write audit log for login:', auditErr.message);
+        }
 
         res.status(200).json({ message: 'Login successful' });
     } catch (error: any) {
@@ -257,6 +277,14 @@ export const getCurrentUser = (req: AuthenticatedRequest, res: Response): void =
 };
 
 /**
+ * @desc    JWKS Endpoint for public key verification
+ * @route   GET /api/auth/.well-known/jwks.json
+ */
+export const getJwksEndpoint = (req: Request, res: Response): void => {
+    res.status(200).json(getJwks());
+};
+
+/**
  * @desc    Single Sign-On (SSO) redirect to GSO System
  * @route   GET /api/auth/sso/redirect/gso
  */
@@ -361,6 +389,14 @@ export const googleCallback = (req: Request, res: Response): any => {
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 60 * 60 * 1000 // 1 hour
     });
+
+    // Audit Log for Google SSO login
+    AuditLog.create({
+        action: 'login',
+        performedBy: user._id,
+        targetUser: user._id,
+        details: `User ${user.employeeId} logged in via Google SSO.`
+    }).catch(err => console.error('Failed to write audit log for Google SSO login:', err));
 
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 };

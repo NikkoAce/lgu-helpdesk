@@ -70,6 +70,11 @@ web_modules/
 .env.*
 !.env.example
 
+
+#RSA Keys
+.pem
+
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -139,4 +144,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Legacy public backup folder
-public_legacy_backup/
+public_legacy_backup/

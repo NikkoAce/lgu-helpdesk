@@ -21,6 +21,7 @@ export const Tickets: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [statusFilter, setStatusFilter] = useState('All');
+  const [assignmentFilter, setAssignmentFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch tickets
@@ -31,6 +32,9 @@ export const Tickets: React.FC = () => {
         let endpoint = `tickets?page=${currentPage}&limit=10`;
         if (statusFilter !== 'All') {
           endpoint += `&status=${statusFilter}`;
+        }
+        if (assignmentFilter === 'me') {
+          endpoint += `&assignment=me`;
         }
         if (searchQuery.trim()) {
           endpoint += `&search=${encodeURIComponent(searchQuery.trim())}`;
@@ -54,7 +58,7 @@ export const Tickets: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [currentPage, statusFilter, searchQuery]);
+  }, [currentPage, statusFilter, assignmentFilter, searchQuery]);
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -124,8 +128,22 @@ export const Tickets: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <Filter size={16} className="text-base-content/50" />
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 bg-base-200 p-1 rounded-lg">
+            <button 
+              onClick={() => { setAssignmentFilter('all'); setCurrentPage(1); }}
+              className={`btn btn-xs ${assignmentFilter === 'all' ? 'btn-primary' : 'btn-ghost text-base-content/60'}`}
+            >
+              All Tickets
+            </button>
+            <button 
+              onClick={() => { setAssignmentFilter('me'); setCurrentPage(1); }}
+              className={`btn btn-xs ${assignmentFilter === 'me' ? 'btn-primary' : 'btn-ghost text-base-content/60'}`}
+            >
+              My Tickets
+            </button>
+          </div>
+          <Filter size={16} className="text-base-content/50 ml-2" />
           <select 
             className="select select-bordered select-sm w-full sm:w-40"
             value={statusFilter}
@@ -158,6 +176,7 @@ export const Tickets: React.FC = () => {
                 <tr>
                   <th className="bg-base-100 text-xs text-base-content/60 font-semibold uppercase tracking-wider px-6 py-4">Subject / Category</th>
                   <th className="bg-base-100 text-xs text-base-content/60 font-semibold uppercase tracking-wider px-6 py-4">Requester</th>
+                  <th className="bg-base-100 text-xs text-base-content/60 font-semibold uppercase tracking-wider px-6 py-4">Assigned To</th>
                   <th className="bg-base-100 text-xs text-base-content/60 font-semibold uppercase tracking-wider px-6 py-4">Status</th>
                   <th className="bg-base-100 text-xs text-base-content/60 font-semibold uppercase tracking-wider px-6 py-4">Created On</th>
                   <th className="bg-base-100 text-xs text-base-content/60 font-semibold uppercase tracking-wider px-6 py-4 text-right">Action</th>
@@ -173,6 +192,13 @@ export const Tickets: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="text-sm font-semibold text-base-content">{ticket.requesterName}</div>
                       <div className="text-xs text-base-content/50">{ticket.requesterRole} ({ticket.requesterOffice || 'N/A'})</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {ticket.assignedTo ? (
+                        <div className="text-sm font-semibold text-base-content">{ticket.assignedTo.name}</div>
+                      ) : (
+                        <span className="text-xs italic text-base-content/40">Unassigned</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">{getStatusBadge(ticket.status)}</td>
                     <td className="px-6 py-4 text-sm text-base-content/75">
